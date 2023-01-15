@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.8.0"
-    application
+    id("com.bnorm.power.kotlin-power-assert") version "0.12.0"
 }
 
 repositories {
@@ -13,14 +13,14 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "11"
 }
 
-application {
-    mainClass.set("MainKt")
+tasks.test {
+    useJUnitPlatform()
+}
+
+configure<com.bnorm.power.PowerAssertGradleExtension> {
+    functions = listOf("kotlin.assert", "kotlin.test.assertTrue", "kotlin.test.assertEquals")
 }
