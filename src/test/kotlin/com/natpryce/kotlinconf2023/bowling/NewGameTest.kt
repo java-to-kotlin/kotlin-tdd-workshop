@@ -25,12 +25,12 @@ class NewGameTest {
     }
 }
 
-data class BowlingGame(val rolls: List<Int> = emptyList())
+data class BowlingGame(val rollCount: Int = 0)
 
 fun newGame() = BowlingGame()
 
 fun BowlingGame.afterRoll(score: Int): BowlingGame =
-    copy(rolls = rolls + score)
+    copy(rollCount = rollCount + 1)
 
 fun BowlingGame.nextPlayerToBowl(): Int =
-    rolls.size % 2
+    rollCount % 2
