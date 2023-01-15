@@ -18,14 +18,12 @@ class NewGameTest {
     }
 }
 
-private fun BowlingGame.afterRoll(score: Int): BowlingGame {
-    TODO("Not yet implemented")
-}
+data class BowlingGame(val hasRolled: Boolean = false)
 
-private fun BowlingGame.nextPlayerToBowl(): Int = 0
+fun newGame() = BowlingGame()
 
-object BowlingGame
+fun BowlingGame.afterRoll(score: Int): BowlingGame =
+    copy(hasRolled = true)
 
-fun newGame(): BowlingGame {
-    return BowlingGame
-}
+fun BowlingGame.nextPlayerToBowl(): Int =
+    if (hasRolled) 1 else 0
