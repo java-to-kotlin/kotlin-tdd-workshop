@@ -1,7 +1,6 @@
 package com.natpryce.kotlinconf2023.bowling
 
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class NewGameTest {
     @Test
@@ -50,4 +49,4 @@ fun BowlingGame.afterRoll(score: Int): BowlingGame =
     copy(rollCount = rollCount + 1)
 
 fun BowlingGame.nextPlayerToBowl(): Int =
-    rollCount % 2
+    rollCount % playerCount
