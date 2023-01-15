@@ -16,6 +16,13 @@ class NewGameTest {
         
         assertEquals(1, game.nextPlayerToBowl())
     }
+    
+    @Test
+    fun `second player bowls a strike, back to first player`() {
+        val game = newGame().afterRoll(10).afterRoll(10)
+        
+        assertEquals(0, game.nextPlayerToBowl())
+    }
 }
 
 data class BowlingGame(val hasRolled: Boolean = false)
