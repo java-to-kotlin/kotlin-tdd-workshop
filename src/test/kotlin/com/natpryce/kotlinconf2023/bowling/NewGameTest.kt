@@ -12,12 +12,10 @@ class NewGameTest {
     
 }
 
-private fun BowlingGame.nextPlayerToBowl(): Int {
-    TODO("Not yet implemented")
-}
+private fun BowlingGame.nextPlayerToBowl(): Int = 0
 
 object BowlingGame
 
 fun newGame(): BowlingGame {
-    TODO("Not yet implemented")
+    return BowlingGame
 }
