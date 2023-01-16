@@ -27,15 +27,26 @@ class PlayerTurnsTest {
     @Test
     fun `game with three players`() {
         newGame(playerCount = 3)
-            .also { assert(it.nextPlayerToBowl() == 0) }
+            .then { assert(it.nextPlayerToBowl() == 0) }
             .afterRoll(10)
-            .also { assert(it.nextPlayerToBowl() == 1) }
+            .then { assert(it.nextPlayerToBowl() == 1) }
             .afterRoll(10)
-            .also { assert(it.nextPlayerToBowl() == 2) }
+            .then { assert(it.nextPlayerToBowl() == 2) }
             .afterRoll(10)
-            .also { assert(it.nextPlayerToBowl() == 0) }
+            .then { assert(it.nextPlayerToBowl() == 0) }
+    }
+    
+    @Test
+    fun `player scores less than 10 in two rolls`() {
+        newGame(playerCount = 2)
+            .afterRoll(4)
+            .then { assert(it.nextPlayerToBowl() == 0) }
+            .afterRoll(4)
+            .then { assert(it.nextPlayerToBowl() == 1) }
     }
 }
+
+inline fun <T> T.then(statement: (T)->Unit): T = also(statement)
 
 data class BowlingGame(
     val playerCount: Int,
