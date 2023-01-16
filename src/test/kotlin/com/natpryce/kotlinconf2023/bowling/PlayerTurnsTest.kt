@@ -2,16 +2,16 @@ package com.natpryce.kotlinconf2023.bowling
 
 import kotlin.test.Test
 
-class NewGameTest {
+class PlayerTurnsTest {
     @Test
-    fun `new game, player 1 to start`() {
+    fun `new game, first player to start`() {
         val game = newGame(playerCount = 2)
         
         assert(game.nextPlayerToBowl() == 0)
     }
     
     @Test
-    fun `first player bowls a strike`() {
+    fun `first player bowls a strike, second player up next`() {
         val game = newGame(playerCount = 2).afterRoll(10)
         
         assert(game.nextPlayerToBowl() == 1)
