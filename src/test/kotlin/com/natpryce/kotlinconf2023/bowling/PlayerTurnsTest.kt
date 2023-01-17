@@ -41,8 +41,12 @@ class PlayerTurnsTest {
         newGame(playerCount = 2)
             .afterRoll(4)
             .then { assert(it.nextPlayerToBowl() == 0) }
-            .afterRoll(4)
+            .afterRoll(3)
             .then { assert(it.nextPlayerToBowl() == 1) }
+            .afterRoll(2)
+            .then { assert(it.nextPlayerToBowl() == 1) }
+            .afterRoll(1)
+            .then { assert(it.nextPlayerToBowl() == 0) }
     }
 }
 
