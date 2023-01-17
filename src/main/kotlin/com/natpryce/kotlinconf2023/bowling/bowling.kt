@@ -35,13 +35,13 @@ private fun PlayerFrames.plusScore(score: Int) =
 
 // A game played by two or more players
 data class BowlingGame(
-    val playerCount: Int,
-    val playerFrames: PersistentList<PlayerFrames> =
-        (1..playerCount).map { newPlayerFrames }.toPersistentList()
+    val playerFrames: PersistentList<PlayerFrames>
 )
 
 fun newGame(playerCount: Int) =
-    BowlingGame(playerCount = playerCount)
+    BowlingGame(
+        playerFrames = (1..playerCount).map { newPlayerFrames }.toPersistentList()
+    )
 
 fun PersistentList<PlayerFrames>.withNewFrames() =
     map { it + unplayedFrame }.toPersistentList()
