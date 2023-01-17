@@ -50,14 +50,18 @@ inline fun <T> T.then(statement: (T)->Unit): T = also(statement)
 
 data class BowlingGame(
     val playerCount: Int,
-    val rollCount: Int = 0
+    val rollsByPlayer : List<Int> = emptyList()
 )
 
 fun newGame(playerCount: Int) =
     BowlingGame(playerCount = playerCount)
 
 fun BowlingGame.afterRoll(score: Int): BowlingGame =
-    copy(rollCount = rollCount + 1)
+    copy(rollsByPlayer = rollsByPlayer + score)
 
 fun BowlingGame.nextPlayerToBowl(): Int =
-    rollCount % playerCount
+    if (rollsByPlayer.isNotEmpty() && rollsByPlayer.last() < 10) {
+        rollsByPlayer.lastIndex
+    } else {
+        rollsByPlayer.size % playerCount
+    }
