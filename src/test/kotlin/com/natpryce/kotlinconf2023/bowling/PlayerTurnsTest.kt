@@ -48,7 +48,20 @@ class PlayerTurnsTest {
             .afterRoll(1)
             .then { assert(it.nextPlayerToBowl() == 0) }
     }
+    
+    @Test
+    fun `player scores a spare`() {
+        newGame(playerCount = 2)
+            .afterRoll(6)
+            .then { assert(it.nextPlayerToBowl() == 0) }
+            .afterRoll(4)
+            .then { assert(it.nextPlayerToBowl() == 1) }
+            .afterRoll(3)
+            .then { assert(it.nextPlayerToBowl() == 1) }
+            .afterRoll(7)
+            .then { assert(it.nextPlayerToBowl() == 0) }
+    }
 }
 
-inline fun <T> T.then(statement: (T)->Unit): T = also(statement)
+inline fun <T> T.then(statement: (T) -> Unit): T = also(statement)
 
