@@ -12,6 +12,8 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5")
     testImplementation(kotlin("test"))
+    testImplementation("io.kotest:kotest-runner-junit5:5.5.4")
+    testImplementation("io.kotest:kotest-property:5.5.4")
 }
 
 tasks.withType<KotlinCompile>() {

@@ -1,65 +1,79 @@
 package com.natpryce.kotlinconf2023.bowling
 
-import kotlin.test.Test
+import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.flatMap
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.map
+import io.kotest.property.arbitrary.next
+import io.kotest.property.checkAll
 
-class PlayerTurnsTest {
+private val BowlingGame.playerCount: Int
+    get() = playerFrames.size
+
+// Most alleys will allow a maximum of six to eight players on a lane at once.
+// In competition play, there is usually a maximum of five players per team.
+private fun Arb.Companion.playerCount() = int(2..10)
+private fun Arb.Companion.bowlingGame() = playerCount().map(::newGame)
+private fun Arb.Companion.roll(pinsDown: Int = 0, maxPins: Int = 10) = Arb.int(0..(maxPins - pinsDown))
+private fun Arb.Companion.frame(maxPins: Int = 10, maxPinsInFirstRoll: Int = maxPins) =
+    roll(maxPins = maxPinsInFirstRoll)
+        .flatMap { i ->
+            roll(pinsDown = i, maxPins = maxPins)
+                .map { j -> Pair(i, j) }
+        }
+
+
+fun <T> T.repeated(times: Int, f: (T) -> T): T {
+    var result = this
+    repeat(times) {
+        result = f(result)
+    }
+    return result
+}
+
+
+class PlayerTurnsTest : AnnotationSpec() {
     @Test
-    fun `new game, first player to start`() {
-        val game = newGame(playerCount = 2)
-        
-        assert(game.nextPlayerToBowl() == 0)
+    suspend fun `new game, first player to start`() {
+        checkAll(Arb.bowlingGame()) { game ->
+            assert(game.nextPlayerToBowl() == 0)
+        }
     }
     
     @Test
-    fun `first player bowls a strike, second player up next`() {
-        val game = newGame(playerCount = 2).afterRoll(10)
-        
-        assert(game.nextPlayerToBowl() == 1)
+    suspend fun `all players bowl a strike, back to first player`() {
+        checkAll(Arb.bowlingGame()) { newGame ->
+            newGame
+                .repeated(times = newGame.playerCount - 1) { beforeRoll ->
+                    val player = beforeRoll.nextPlayerToBowl()
+                    
+                    val result = beforeRoll.afterRoll(10)
+                    
+                    assert(result.nextPlayerToBowl() == player + 1)
+                    
+                    result
+                    
+                }
+                .then { finalRoll ->
+                    assert(finalRoll.afterRoll(10).nextPlayerToBowl() == 0)
+                }
+        }
     }
     
     @Test
-    fun `second player bowls a strike, back to first player`() {
-        val game = newGame(playerCount = 2).afterRoll(10).afterRoll(10)
-        
-        assert(game.nextPlayerToBowl() == 0)
-    }
-    
-    @Test
-    fun `game with three players`() {
-        newGame(playerCount = 3)
-            .then { assert(it.nextPlayerToBowl() == 0) }
-            .afterRoll(10)
-            .then { assert(it.nextPlayerToBowl() == 1) }
-            .afterRoll(10)
-            .then { assert(it.nextPlayerToBowl() == 2) }
-            .afterRoll(10)
-            .then { assert(it.nextPlayerToBowl() == 0) }
-    }
-    
-    @Test
-    fun `player scores less than 10 in two rolls`() {
-        newGame(playerCount = 2)
-            .afterRoll(4)
-            .then { assert(it.nextPlayerToBowl() == 0) }
-            .afterRoll(3)
-            .then { assert(it.nextPlayerToBowl() == 1) }
-            .afterRoll(2)
-            .then { assert(it.nextPlayerToBowl() == 1) }
-            .afterRoll(1)
-            .then { assert(it.nextPlayerToBowl() == 0) }
-    }
-    
-    @Test
-    fun `player scores a spare`() {
-        newGame(playerCount = 2)
-            .afterRoll(6)
-            .then { assert(it.nextPlayerToBowl() == 0) }
-            .afterRoll(4)
-            .then { assert(it.nextPlayerToBowl() == 1) }
-            .afterRoll(3)
-            .then { assert(it.nextPlayerToBowl() == 1) }
-            .afterRoll(7)
-            .then { assert(it.nextPlayerToBowl() == 0) }
+    suspend fun `players score less than 10 in first roll, back to first player`() {
+        checkAll(Arb.bowlingGame()) { newGame ->
+            newGame
+                .repeated(times = newGame.playerCount) {
+                    val (first, second) = Arb.frame(maxPinsInFirstRoll = 9).next()
+                    
+                    it.afterRoll(first).afterRoll(second)
+                }
+                .then {
+                    assert(it.nextPlayerToBowl() == 0)
+                }
+        }
     }
 }
 
