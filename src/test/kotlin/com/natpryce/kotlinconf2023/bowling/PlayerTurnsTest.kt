@@ -8,9 +8,6 @@ import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.next
 import io.kotest.property.checkAll
 
-private val BowlingGame.playerCount: Int
-    get() = playerFrames.size
-
 // Most alleys will allow a maximum of six to eight players on a lane at once.
 // In competition play, there is usually a maximum of five players per team.
 private fun Arb.Companion.playerCount() = int(1..10)

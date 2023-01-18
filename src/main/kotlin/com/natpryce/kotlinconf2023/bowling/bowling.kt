@@ -38,6 +38,9 @@ data class BowlingGame(
     val playerFrames: PersistentList<PlayerFrames>
 )
 
+val BowlingGame.playerCount: Int
+    get() = playerFrames.size
+
 fun newGame(playerCount: Int) =
     BowlingGame(
         playerFrames = (1..playerCount).map { newPlayerFrames }.toPersistentList()
