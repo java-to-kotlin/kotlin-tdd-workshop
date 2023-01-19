@@ -1,0 +1,26 @@
+package com.natpryce.kotlinconf2023.bowling
+
+import io.kotest.core.spec.style.AnnotationSpec
+
+class EndGameTest : AnnotationSpec() {
+    @Test
+    fun `end game after 10 complete frames each, no bonus rolls`() {
+        val playerCount = 2
+        
+        val game = newGame(playerCount).repeated(10) {
+            it.repeated(playerCount) { game ->
+                game
+                    .also { assert(!it.isOver()) }
+                    .afterRoll(1)
+                    .also { assert(!it.isOver()) }
+                    .afterRoll(2)
+            }
+        }
+        
+        assert(game.isOver())
+    }
+}
+
+fun BowlingGame.isOver(): Boolean {
+    TODO("Not yet implemented")
+}
