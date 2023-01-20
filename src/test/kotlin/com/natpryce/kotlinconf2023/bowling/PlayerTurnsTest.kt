@@ -54,5 +54,25 @@ class PlayerTurnsTest : AnnotationSpec() {
             assert(finalRoll.nextPlayerToBowl() == 0)
         }
     }
+    
+    @Test
+    suspend fun `players score less than 10 in both rolls, back to first player`() {
+        checkAll(Arb.bowlingGame()) { newGame ->
+            val finalRoll = newGame
+                .repeated(times = newGame.playerCount) { turn ->
+                    val (first, second) = Arb.frame(maxPinsInFirstRoll = 9, maxPins = 9).next()
+                    
+                    val player = turn.nextPlayerToBowl()
+    
+                    val afterFirstRoll = turn.afterRoll(first)
+                    assert(afterFirstRoll.playerFrames[player].size == turn.playerFrames[player].size)
+                    val afterSecondRoll = afterFirstRoll.afterRoll(second)
+
+                    afterSecondRoll
+                }
+            
+            assert(finalRoll.nextPlayerToBowl() == 0)
+        }
+    }
 }
 

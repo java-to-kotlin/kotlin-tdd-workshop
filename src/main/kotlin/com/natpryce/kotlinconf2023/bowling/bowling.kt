@@ -1,13 +1,17 @@
 package com.natpryce.kotlinconf2023.bowling
 
 import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.plus
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.plus
 import kotlinx.collections.immutable.toPersistentList
 
 data class Frame(
     val scores: PersistentList<Int>
-)
+) {
+    override fun toString(): String {
+        return if (scores.isEmpty()) "-" else scores.joinToString("+") + "=" + pins()
+    }
+}
 
 val unplayedFrame = Frame(persistentListOf())
 
@@ -17,7 +21,7 @@ private fun Frame.isIncomplete(): Boolean =
 private fun Frame.isComplete(): Boolean =
     scores.size == 2 || pins() == 10
 
-private fun Frame.pins() =
+fun Frame.pins() =
     scores.sum()
 
 private fun Frame.plusScore(score: Int): Frame =
@@ -30,8 +34,11 @@ typealias PlayerFrames = PersistentList<Frame>
 
 val newPlayerFrames = persistentListOf(unplayedFrame)
 
+private fun <T> PersistentList<T>.setLast(e: T) =
+    set(size - 1, e)
+
 private fun PlayerFrames.plusScore(score: Int) =
-    set(0, this[0].plusScore(score))
+    setLast(last().plusScore(score))
 
 // A game played by two or more players
 data class BowlingGame(
@@ -51,19 +58,23 @@ fun PersistentList<PlayerFrames>.withNewFrames() =
 
 fun BowlingGame.afterRoll(score: Int): BowlingGame {
     val player = nextPlayerToBowl()
-    val frames = if (player == 0) playerFrames.withNewFrames() else playerFrames
     
-    return copy(
-        playerFrames = frames.plusScoreForPlayer(player, score)
-    )
+    return copy(playerFrames = playerFrames.plusScoreForPlayer(player, score))
+        .startNewRound()
 }
+
+private fun BowlingGame.startNewRound(): BowlingGame =
+    if (playerFrames.last().last().isComplete()) {
+        copy(playerFrames=playerFrames.withNewFrames())
+    } else {
+        this
+    }
 
 private fun PersistentList<PlayerFrames>.plusScoreForPlayer(player: Int, score: Int) =
     set(player, get(player).plusScore(score))
 
 fun BowlingGame.nextPlayerToBowl(): Int =
     playerFrames
-        .indexOfFirst { it[0].isIncomplete() }
+        .indexOfFirst { it.last().isIncomplete() }
         .takeUnless { it < 0 }
         ?: 0
-
