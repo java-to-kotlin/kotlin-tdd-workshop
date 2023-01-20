@@ -7,9 +7,9 @@ class EndGameTest : AnnotationSpec() {
     fun `end game after 10 complete frames each, no bonus rolls`() {
         val playerCount = 2
         
-        val game = newGame(playerCount).repeated(10) {
-            it.repeated(playerCount) { game ->
-                game
+        val game = newGame(playerCount).repeated(10) { game ->
+            game.repeated(playerCount) { turn ->
+                turn
                     .also { assert(!it.isOver()) }
                     .afterRoll(1)
                     .also { assert(!it.isOver()) }
@@ -20,4 +20,3 @@ class EndGameTest : AnnotationSpec() {
         assert(game.isOver())
     }
 }
-
