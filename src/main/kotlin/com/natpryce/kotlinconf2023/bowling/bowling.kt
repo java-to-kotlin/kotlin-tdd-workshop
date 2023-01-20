@@ -37,8 +37,12 @@ val newPlayerFrames = persistentListOf(unplayedFrame)
 private fun <T> PersistentList<T>.setLast(e: T) =
     set(size - 1, e)
 
-private fun PlayerFrames.plusScore(score: Int) =
+fun PlayerFrames.plusScore(score: Int) =
     setLast(last().plusScore(score))
+
+fun PlayerFrames.isComplete(): Boolean =
+    size == 10 && last().isComplete()
+
 
 // A game played by two or more players
 data class BowlingGame(
@@ -64,7 +68,7 @@ fun BowlingGame.afterRoll(score: Int): BowlingGame {
 }
 
 private fun BowlingGame.startNewRound(): BowlingGame =
-    if (playerFrames.last().last().isComplete()) {
+    if (playerFrames.last().last().isComplete() && !isOver()) {
         copy(playerFrames=playerFrames.withNewFrames())
     } else {
         this
@@ -78,3 +82,6 @@ fun BowlingGame.nextPlayerToBowl(): Int =
         .indexOfFirst { it.last().isIncomplete() }
         .takeUnless { it < 0 }
         ?: 0
+
+fun BowlingGame.isOver(): Boolean =
+    playerFrames.all { it.isComplete() }

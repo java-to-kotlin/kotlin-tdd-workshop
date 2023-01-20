@@ -4,7 +4,6 @@ import io.kotest.core.spec.style.AnnotationSpec
 
 class EndGameTest : AnnotationSpec() {
     @Test
-    @Ignore // ignoring test while fixing bug
     fun `end game after 10 complete frames each, no bonus rolls`() {
         val playerCount = 2
         
@@ -22,8 +21,3 @@ class EndGameTest : AnnotationSpec() {
     }
 }
 
-fun BowlingGame.isOver(): Boolean =
-    playerFrames.all { it.isComplete() }
-
-private fun PlayerFrames.isComplete(): Boolean =
-    size == 10
