@@ -15,7 +15,7 @@ fun Arb.Companion.frames(n: IntRange): Arb<PlayerFrames> =
         .map { frames ->
             frames.fold(newPlayerFrames) { acc, (first, second) ->
                 acc.plusScore(first).let {
-                    if (first != 10) it.plusScore(second) else it
+                    if (first == 10) it else it.plusScore(second)
                 }
             }
         }
@@ -27,7 +27,7 @@ fun PlayerFrames.isNotComplete(): Boolean = !isComplete()
 class PlayerFramesTest : AnnotationSpec() {
     @Test
     suspend fun `game is not over if fewer than ten turns`() {
-        checkAll(Arb.frames(9)) { gameSoFar ->
+        checkAll(Arb.frames(0..9)) { gameSoFar ->
             assertTrue(gameSoFar.isNotComplete())
         }
     }
@@ -47,7 +47,7 @@ class PlayerFramesTest : AnnotationSpec() {
             val beforeBonusRoll = gameSoFar.plusScore(firstRoll).plusScore(10 - firstRoll)
             assertTrue(beforeBonusRoll.isNotComplete())
             
-            val afterBonusRoll = gameSoFar.plusScore(bonusRoll)
+            val afterBonusRoll = beforeBonusRoll.plusScore(bonusRoll)
             assertTrue(afterBonusRoll.isComplete())
         }
     }

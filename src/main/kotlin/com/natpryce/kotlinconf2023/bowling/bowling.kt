@@ -18,16 +18,24 @@ val unplayedFrame = Frame(persistentListOf())
 private fun Frame.isIncomplete(): Boolean =
     !isComplete()
 
+val pinCount = 10
+val frameLimit = pinCount
+
 private fun Frame.isComplete(): Boolean =
-    scores.size == 2 || pins() == 10
+    scores.size == 2 || pins() == pinCount
+
+private fun Frame.isCompleteFinalFrame(): Boolean =
+    when {
+        scores.size < 2 -> false
+        scores[0] + scores[1] == pinCount -> scores.size == 3
+        else -> true
+    }
 
 fun Frame.pins() =
     scores.sum()
 
 private fun Frame.plusScore(score: Int): Frame =
     copy(scores = scores + score)
-
-
 
 // Frames played by a single player in the game
 typealias PlayerFrames = PersistentList<Frame>
@@ -37,11 +45,13 @@ val newPlayerFrames = persistentListOf(unplayedFrame)
 private fun <T> PersistentList<T>.setLast(e: T) =
     set(size - 1, e)
 
+
 fun PlayerFrames.plusScore(score: Int) =
-    setLast(last().plusScore(score))
+    (if (size < frameLimit && last().isComplete()) this + unplayedFrame else this)
+        .run { setLast(last().plusScore(score)) }
 
 fun PlayerFrames.isComplete(): Boolean =
-    size == 10 && last().isComplete()
+    size == frameLimit && last().isCompleteFinalFrame()
 
 
 // A game played by two or more players
