@@ -22,7 +22,7 @@ fun Arb.Companion.frames(n: IntRange): Arb<PlayerFrames> =
 
 
 
-fun PlayerFrames.isNotComplete(): Boolean = !isComplete()
+fun PlayerFrames.isNotComplete(): Boolean = !isOver()
 
 class PlayerFramesTest : AnnotationSpec() {
     @Test
@@ -37,7 +37,7 @@ class PlayerFramesTest : AnnotationSpec() {
         checkAll(Arb.frames(9), Arb.frame(maxPins = 9)) { gameSoFar, (firstRoll, secondRoll) ->
             val afterLastFrame = gameSoFar.plusScore(firstRoll).plusScore(secondRoll)
             
-            assertTrue(afterLastFrame.isComplete())
+            assertTrue(afterLastFrame.isOver())
         }
     }
     
@@ -48,7 +48,7 @@ class PlayerFramesTest : AnnotationSpec() {
             assertTrue(beforeBonusRoll.isNotComplete())
             
             val afterBonusRoll = beforeBonusRoll.plusScore(bonusRoll)
-            assertTrue(afterBonusRoll.isComplete())
+            assertTrue(afterBonusRoll.isOver())
         }
     }
     
@@ -62,7 +62,7 @@ class PlayerFramesTest : AnnotationSpec() {
             assertTrue(afterFirstBonusRoll.isNotComplete())
             
             val afterSecondBonusRoll = afterFirstBonusRoll.plusScore(secondBonusRoll)
-            assertTrue(afterSecondBonusRoll.isComplete())
+            assertTrue(afterSecondBonusRoll.isOver())
         }
     }
 }

@@ -53,12 +53,15 @@ private fun <T> PersistentList<T>.setLast(e: T) =
 
 
 fun PlayerFrames.plusScore(score: Int) =
-    (if (size < frameLimit && last().isComplete()) this + unplayedFrame else this)
-        .run { setLast(last().plusScore(score)) }
+    with(if (size == frameLimit || isReadyToBowl()) this else this + unplayedFrame) {
+        setLast(last().plusScore(score))
+    }
 
-fun PlayerFrames.isComplete(): Boolean =
+fun PlayerFrames.isOver(): Boolean =
     size == frameLimit && last().isCompleteFinalFrame()
 
+fun PlayerFrames.isReadyToBowl() =
+    last().isIncomplete()
 
 // A game played by two or more players
 data class BowlingGame(
@@ -85,7 +88,7 @@ fun BowlingGame.afterRoll(score: Int): BowlingGame {
 
 private fun BowlingGame.startNewRound(): BowlingGame =
     if (playerFrames.last().last().isComplete() && !isOver()) {
-        copy(playerFrames=playerFrames.withNewFrames())
+        copy(playerFrames = playerFrames.withNewFrames())
     } else {
         this
     }
@@ -95,9 +98,9 @@ private fun PersistentList<PlayerFrames>.plusScoreForPlayer(player: Int, score: 
 
 fun BowlingGame.nextPlayerToBowl(): Int =
     playerFrames
-        .indexOfFirst { it.last().isIncomplete() }
+        .indexOfFirst { it.isReadyToBowl() }
         .takeUnless { it < 0 }
         ?: 0
 
 fun BowlingGame.isOver(): Boolean =
-    playerFrames.all { it.isComplete() }
+    playerFrames.all { it.isOver() }
