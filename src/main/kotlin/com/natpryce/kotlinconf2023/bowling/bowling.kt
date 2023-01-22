@@ -27,9 +27,15 @@ private fun Frame.isComplete(): Boolean =
 private fun Frame.isCompleteFinalFrame(): Boolean =
     when {
         scores.size < 2 -> false
-        scores[0] + scores[1] == pinCount -> scores.size == 3
+        isStrike() || isSpare() == pinCount -> scores.size == 3
         else -> true
     }
+
+fun Frame.isSpare() =
+    scores[0] + scores[1]
+
+fun Frame.isStrike() =
+    scores[0] == pinCount
 
 fun Frame.pins() =
     scores.sum()
