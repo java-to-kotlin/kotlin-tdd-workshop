@@ -6,14 +6,6 @@ import io.kotest.property.arbitrary.next
 import io.kotest.property.checkAll
 
 
-fun <T> T.repeated(times: Int, f: (T) -> T): T {
-    var result = this
-    repeat(times) {
-        result = f(result)
-    }
-    return result
-}
-
 
 class PlayerTurnsTest : AnnotationSpec() {
     @Test

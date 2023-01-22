@@ -53,15 +53,23 @@ private fun <T> PersistentList<T>.setLast(e: T) =
 
 
 fun PlayerFrames.plusScore(score: Int) =
-    with(if (size == frameLimit || isReadyToBowl()) this else this + unplayedFrame) {
+    if (latestFrameComplete()) {
+        this + unplayedFrame.plusScore(score)
+    } else {
         setLast(last().plusScore(score))
     }
 
 fun PlayerFrames.isOver(): Boolean =
-    size == frameLimit && last().isCompleteFinalFrame()
+    size == frameLimit && latestFrameComplete()
+
+fun PlayerFrames.latestFrameComplete() =
+    when (size) {
+        frameLimit -> last().isCompleteFinalFrame()
+        else -> last().isComplete()
+    }
 
 fun PlayerFrames.isReadyToBowl() =
-    last().isIncomplete()
+    !latestFrameComplete()
 
 // A game played by two or more players
 data class BowlingGame(
@@ -76,31 +84,21 @@ fun newGame(playerCount: Int) =
         playerFrames = (1..playerCount).map { newPlayerFrames }.toPersistentList()
     )
 
-fun PersistentList<PlayerFrames>.withNewFrames() =
-    map { it + unplayedFrame }.toPersistentList()
-
 fun BowlingGame.afterRoll(score: Int): BowlingGame {
     val player = nextPlayerToBowl()
     
     return copy(playerFrames = playerFrames.plusScoreForPlayer(player, score))
-        .startNewRound()
 }
-
-private fun BowlingGame.startNewRound(): BowlingGame =
-    if (playerFrames.last().last().isComplete() && !isOver()) {
-        copy(playerFrames = playerFrames.withNewFrames())
-    } else {
-        this
-    }
 
 private fun PersistentList<PlayerFrames>.plusScoreForPlayer(player: Int, score: Int) =
     set(player, get(player).plusScore(score))
 
 fun BowlingGame.nextPlayerToBowl(): Int =
     playerFrames
-        .indexOfFirst { it.isReadyToBowl() }
-        .takeUnless { it < 0 }
-        ?: 0
+        .indexOfFirst {
+            it.isReadyToBowl() || it.size < playerFrames.first().size
+        }
+        .coerceAtLeast(0)
 
 fun BowlingGame.isOver(): Boolean =
     playerFrames.all { it.isOver() }
