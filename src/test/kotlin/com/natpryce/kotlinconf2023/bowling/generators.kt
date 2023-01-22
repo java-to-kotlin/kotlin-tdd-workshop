@@ -7,11 +7,8 @@ import io.kotest.property.arbitrary.map
 
 // Most alleys will allow a maximum of six to eight players on a lane at once.
 // In competition play, there is usually a maximum of five players per team.
-fun Arb.Companion.playerCount(n: IntRange = 1..10) =
-    int(n)
-
 fun Arb.Companion.bowlingGame(playerCount: IntRange = 1..10) =
-    playerCount(playerCount).map(::newGame)
+    int(playerCount).map(::newGame)
 
 fun Arb.Companion.roll(pinsDown: Int = 0, maxPins: Int = 10) =
     Arb.int(0..(maxPins - pinsDown))
