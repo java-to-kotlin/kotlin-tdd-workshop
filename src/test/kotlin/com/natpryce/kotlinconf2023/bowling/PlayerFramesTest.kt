@@ -53,8 +53,16 @@ class PlayerFramesTest : AnnotationSpec() {
     }
     
     @Test
-    @Ignore
-    fun `game is over after ten turns with two bonus rolls if last frame is a strike`() {
-        TODO()
+    suspend fun `game is over after ten turns with two bonus rolls if last frame is a strike`() {
+        checkAll(Arb.frames(9), Arb.roll(), Arb.roll()) { gameSoFar, firstBonusRoll, secondBonusRoll ->
+            val strikeInFinalFrame = gameSoFar.plusScore(10)
+            assertTrue(strikeInFinalFrame.isNotComplete())
+            
+            val afterFirstBonusRoll = strikeInFinalFrame.plusScore(firstBonusRoll)
+            assertTrue(afterFirstBonusRoll.isNotComplete())
+            
+            val afterSecondBonusRoll = afterFirstBonusRoll.plusScore(secondBonusRoll)
+            assertTrue(afterSecondBonusRoll.isComplete())
+        }
     }
 }
