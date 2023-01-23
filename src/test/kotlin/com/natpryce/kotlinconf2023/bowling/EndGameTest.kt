@@ -22,7 +22,7 @@ class EndGameTest : AnnotationSpec() {
     }
     
     @Test
-    fun `end game when last roll is a spare, one bonus rolls`() {
+    fun `end game when last frame is a spare, one bonus roll`() {
         val playerCount = 2
         
         val lastTurn = newGame(playerCount).repeated(9) { game ->
@@ -49,7 +49,7 @@ class EndGameTest : AnnotationSpec() {
     }
     
     @Test
-    fun `end game when last roll is a strike, two bonus rolls`() {
+    fun `end game when last frame is a strike, two bonus rolls`() {
         val playerCount = 2
         
         val lastTurn = newGame(playerCount).repeated(9) { game ->
