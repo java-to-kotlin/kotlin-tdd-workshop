@@ -14,8 +14,8 @@ fun Arb.Companion.frames(n: IntRange): Arb<PlayerFrames> =
     Arb.list(Arb.frame(), n)
         .map { frames ->
             frames.fold(newPlayerFrames) { acc, (first, second) ->
-                acc.plusScore(first).let {
-                    if (first == 10) it else it.plusScore(second)
+                acc.roll(first).let {
+                    if (first == 10) it else it.roll(second)
                 }
             }
         }
@@ -35,7 +35,7 @@ class PlayerFramesTest : AnnotationSpec() {
     @Test
     suspend fun `game is over after ten turns with no bonus roll`() {
         checkAll(Arb.frames(9), Arb.frame(maxPins = 9)) { gameSoFar, (firstRoll, secondRoll) ->
-            val afterLastFrame = gameSoFar.plusScore(firstRoll).plusScore(secondRoll)
+            val afterLastFrame = gameSoFar.roll(firstRoll).roll(secondRoll)
             
             assertTrue(afterLastFrame.isOver())
         }
@@ -44,10 +44,10 @@ class PlayerFramesTest : AnnotationSpec() {
     @Test
     suspend fun `game is over after ten turns with one bonus roll if last frame is a spare`() {
         checkAll(Arb.frames(9), Arb.roll(maxPins = 9), Arb.roll()) { gameSoFar, firstRoll, bonusRoll ->
-            val beforeBonusRoll = gameSoFar.plusScore(firstRoll).plusScore(10 - firstRoll)
+            val beforeBonusRoll = gameSoFar.roll(firstRoll).roll(10 - firstRoll)
             assertTrue(beforeBonusRoll.isNotComplete())
             
-            val afterBonusRoll = beforeBonusRoll.plusScore(bonusRoll)
+            val afterBonusRoll = beforeBonusRoll.roll(bonusRoll)
             assertTrue(afterBonusRoll.isOver())
         }
     }
@@ -55,13 +55,13 @@ class PlayerFramesTest : AnnotationSpec() {
     @Test
     suspend fun `game is over after ten turns with two bonus rolls if last frame is a strike`() {
         checkAll(Arb.frames(9), Arb.roll(), Arb.roll()) { gameSoFar, firstBonusRoll, secondBonusRoll ->
-            val strikeInFinalFrame = gameSoFar.plusScore(10)
+            val strikeInFinalFrame = gameSoFar.roll(10)
             assertTrue(strikeInFinalFrame.isNotComplete())
             
-            val afterFirstBonusRoll = strikeInFinalFrame.plusScore(firstBonusRoll)
+            val afterFirstBonusRoll = strikeInFinalFrame.roll(firstBonusRoll)
             assertTrue(afterFirstBonusRoll.isNotComplete())
             
-            val afterSecondBonusRoll = afterFirstBonusRoll.plusScore(secondBonusRoll)
+            val afterSecondBonusRoll = afterFirstBonusRoll.roll(secondBonusRoll)
             assertTrue(afterSecondBonusRoll.isOver())
         }
     }

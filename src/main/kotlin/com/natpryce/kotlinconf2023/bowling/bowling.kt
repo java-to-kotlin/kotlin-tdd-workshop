@@ -6,10 +6,10 @@ import kotlinx.collections.immutable.plus
 import kotlinx.collections.immutable.toPersistentList
 
 data class Frame(
-    val scores: PersistentList<Int>
+    val rolls: PersistentList<Int>
 ) {
     override fun toString(): String {
-        return if (scores.isEmpty()) "-" else scores.joinToString("+") + "=" + pins()
+        return if (rolls.isEmpty()) "-" else rolls.joinToString("+") + "=" + pins()
     }
 }
 
@@ -22,30 +22,30 @@ val pinCount = 10
 val frameLimit = 10
 
 private fun Frame.isComplete(): Boolean =
-    scores.size == 2 || pins() == pinCount
+    rolls.size == 2 || pins() == pinCount
 
 private fun Frame.isCompleteFinalFrame(): Boolean =
     when {
-        scores.size < 2 -> false
-        isStrike() || isSpare() -> scores.size == 3
+        rolls.size < 2 -> false
+        isStrike() || isSpare() -> rolls.size == 3
         else -> true
     }
 
 fun Frame.isSpare() =
-    (scores[0] + scores[1]) == pinCount
+    (rolls[0] + rolls[1]) == pinCount
 
 fun Frame.isStrike() =
-    scores[0] == pinCount
+    rolls[0] == pinCount
 
 fun Frame.pins() =
     when {
-        scores.isEmpty() -> 0
-        scores[0] == 10 -> 10
-        else -> scores[0] + scores.getOrElse(1) { 0 }
+        rolls.isEmpty() -> 0
+        rolls[0] == 10 -> 10
+        else -> rolls[0] + rolls.getOrElse(1) { 0 }
     }
 
-private fun Frame.plusScore(score: Int): Frame =
-    copy(scores = scores + score)
+private fun Frame.plusRoll(roll: Int): Frame =
+    copy(rolls = rolls + roll)
 
 // Frames played by a single player in the game
 typealias PlayerFrames = PersistentList<Frame>
@@ -56,11 +56,11 @@ private fun <T> PersistentList<T>.setLast(e: T) =
     set(size - 1, e)
 
 
-fun PlayerFrames.plusScore(score: Int) =
+fun PlayerFrames.roll(score: Int) =
     if (latestFrameComplete()) {
-        this + unplayedFrame.plusScore(score)
+        this + unplayedFrame.plusRoll(score)
     } else {
-        setLast(last().plusScore(score))
+        setLast(last().plusRoll(score))
     }
 
 fun PlayerFrames.isOver(): Boolean =
@@ -97,9 +97,9 @@ private fun PlayerFrames.strikeBonusForFrame(frame: Frame, i: Int): Int =
     bonusRolls(frame, i).take(2).sum()
 
 private fun PlayerFrames.bonusRolls(frame: Frame, i: Int) =
-    frame.scores.drop(if (frame.isStrike()) 1 else 2) +
-        (getOrNull(i + 1)?.scores.orEmpty()) +
-        (getOrNull(i + 2)?.scores.orEmpty())
+    frame.rolls.drop(if (frame.isStrike()) 1 else 2) +
+        (getOrNull(i + 1)?.rolls.orEmpty()) +
+        (getOrNull(i + 2)?.rolls.orEmpty())
 
 
 // A game played by two or more players
@@ -118,11 +118,11 @@ fun newGame(playerCount: Int) =
 fun BowlingGame.afterRoll(score: Int): BowlingGame {
     val player = nextPlayerToBowl()
     
-    return copy(playerFrames = playerFrames.plusScoreForPlayer(player, score))
+    return copy(playerFrames = playerFrames.rollByPlayer(player, score))
 }
 
-private fun PersistentList<PlayerFrames>.plusScoreForPlayer(player: Int, score: Int) =
-    set(player, get(player).plusScore(score))
+private fun PersistentList<PlayerFrames>.rollByPlayer(player: Int, roll: Int) =
+    set(player, get(player).roll(roll))
 
 fun BowlingGame.nextPlayerToBowl(): Int =
     playerFrames
