@@ -15,11 +15,8 @@ data class Frame(
 
 val unplayedFrame = Frame(persistentListOf())
 
-private fun Frame.isIncomplete(): Boolean =
-    !isComplete()
-
 val pinCount = 10
-val frameLimit = 10
+val framesPerGame = 10
 
 private fun Frame.isComplete(): Boolean =
     rolls.size == 2 || pins() == pinCount
@@ -64,11 +61,11 @@ fun PlayerFrames.roll(score: Int) =
     }
 
 fun PlayerFrames.isOver(): Boolean =
-    size == frameLimit && latestFrameComplete()
+    size == framesPerGame && latestFrameComplete()
 
 fun PlayerFrames.latestFrameComplete() =
     when (size) {
-        frameLimit -> last().isCompleteFinalFrame()
+        framesPerGame -> last().isCompleteFinalFrame()
         else -> last().isComplete()
     }
 
