@@ -1,6 +1,7 @@
 package com.natpryce.kotlinconf2023.bowling
 
 import io.kotest.core.spec.style.AnnotationSpec
+import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.assertTrue
 
 class ScoringTest : AnnotationSpec() {
@@ -41,8 +42,4 @@ class ScoringTest : AnnotationSpec() {
         val endGame = rolls.fold(newPlayerFrames) { acc, roll -> acc.plusScore(roll) }
         assertTrue(endGame.score() == 300)
     }
-}
-
-fun PlayerFrames.score(): Int {
-    TODO()
 }

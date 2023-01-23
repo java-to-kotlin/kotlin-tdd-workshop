@@ -19,7 +19,7 @@ private fun Frame.isIncomplete(): Boolean =
     !isComplete()
 
 val pinCount = 10
-val frameLimit = pinCount
+val frameLimit = 10
 
 private fun Frame.isComplete(): Boolean =
     scores.size == 2 || pins() == pinCount
@@ -27,18 +27,22 @@ private fun Frame.isComplete(): Boolean =
 private fun Frame.isCompleteFinalFrame(): Boolean =
     when {
         scores.size < 2 -> false
-        isStrike() || isSpare() == pinCount -> scores.size == 3
+        isStrike() || isSpare() -> scores.size == 3
         else -> true
     }
 
 fun Frame.isSpare() =
-    scores[0] + scores[1]
+    (scores[0] + scores[1]) == pinCount
 
 fun Frame.isStrike() =
     scores[0] == pinCount
 
 fun Frame.pins() =
-    scores.sum()
+    when {
+        scores.isEmpty() -> 0
+        scores[0] == 10 -> 10
+        else -> scores[0] + scores.getOrElse(1) { 0 }
+    }
 
 private fun Frame.plusScore(score: Int): Frame =
     copy(scores = scores + score)
@@ -70,6 +74,33 @@ fun PlayerFrames.latestFrameComplete() =
 
 fun PlayerFrames.isReadyToBowl() =
     !latestFrameComplete()
+
+fun PlayerFrames.score(): Int =
+    (0 until size).sumOf(this::scoreForFrame)
+
+fun PlayerFrames.scoreForFrame(i: Int): Int {
+    val frame = get(i)
+    val pins = frame.pins()
+    val bonus = when {
+        frame.isStrike() -> strikeBonusForFrame(frame, i)
+        frame.isSpare() -> spareBonusForFrame(frame, i)
+        else -> 0
+    }
+    
+    return pins + bonus
+}
+
+private fun PlayerFrames.spareBonusForFrame(frame: Frame, i: Int): Int =
+    bonusRolls(frame, i).firstOrNull() ?: 0
+
+private fun PlayerFrames.strikeBonusForFrame(frame: Frame, i: Int): Int =
+    bonusRolls(frame, i).take(2).sum()
+
+private fun PlayerFrames.bonusRolls(frame: Frame, i: Int) =
+    frame.scores.drop(if (frame.isStrike()) 1 else 2) +
+        (getOrNull(i + 1)?.scores.orEmpty()) +
+        (getOrNull(i + 2)?.scores.orEmpty())
+
 
 // A game played by two or more players
 data class BowlingGame(
