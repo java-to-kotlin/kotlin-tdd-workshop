@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalAnimationApi::class)
-
 package com.natpryce.kotlinconf2023.bowling.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -40,8 +38,7 @@ import kotlinx.collections.immutable.plus
 sealed interface AppState
 
 data class SetUp(
-    val playerNames: PersistentList<String> = persistentListOf(),
-    val newPlayerName: String = ""
+    val playerNames: PersistentList<String> = persistentListOf()
 ) : AppState
 
 data class Playing(
