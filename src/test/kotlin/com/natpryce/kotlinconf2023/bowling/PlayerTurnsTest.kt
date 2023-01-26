@@ -57,7 +57,7 @@ class PlayerTurnsTest : AnnotationSpec() {
                     val player = turn.nextPlayerToBowl()
     
                     val afterFirstRoll = turn.afterRoll(first)
-                    assert(afterFirstRoll.playerFrames[player].size == turn.playerFrames[player].size)
+                    assert(afterFirstRoll.players[player].size == turn.players[player].size)
                     val afterSecondRoll = afterFirstRoll.afterRoll(second)
 
                     afterSecondRoll

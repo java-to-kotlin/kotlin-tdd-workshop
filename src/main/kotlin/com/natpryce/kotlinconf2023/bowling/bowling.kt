@@ -18,7 +18,7 @@ val unplayedFrame = Frame(persistentListOf())
 val pinCount = 10
 val framesPerGame = 10
 
-private fun Frame.isComplete(): Boolean =
+fun Frame.isComplete(): Boolean =
     rolls.size == 2 || pins() == pinCount
 
 private fun Frame.isCompleteFinalFrame(): Boolean =
@@ -29,10 +29,10 @@ private fun Frame.isCompleteFinalFrame(): Boolean =
     }
 
 fun Frame.isSpare() =
-    (rolls[0] + rolls[1]) == pinCount
+    rolls.size >= 2 && (rolls[0] + rolls[1]) == pinCount
 
 fun Frame.isStrike() =
-    rolls[0] == pinCount
+    rolls.size >= 1 && rolls[0] == pinCount
 
 fun Frame.pins() =
     when {
@@ -72,6 +72,10 @@ fun PlayerFrames.latestFrameComplete() =
 fun PlayerFrames.isReadyToBowl() =
     !latestFrameComplete()
 
+private fun PlayerFrames.maxNextRoll(): Int {
+    val lastFrame = last()
+    return if (lastFrame.isComplete()) pinCount else (pinCount - lastFrame.pins())
+}
 fun PlayerFrames.score(): Int =
     (0 until size).sumOf(this::scoreForFrame)
 
@@ -101,32 +105,37 @@ private fun PlayerFrames.bonusRolls(frame: Frame, i: Int) =
 
 // A game played by two or more players
 data class BowlingGame(
-    val playerFrames: PersistentList<PlayerFrames>
+    val players: PersistentList<PlayerFrames>
 )
 
 val BowlingGame.playerCount: Int
-    get() = playerFrames.size
+    get() = players.size
 
 fun newGame(playerCount: Int) =
     BowlingGame(
-        playerFrames = (1..playerCount).map { newPlayerFrames }.toPersistentList()
+        players = (1..playerCount).map { newPlayerFrames }.toPersistentList()
     )
 
 fun BowlingGame.afterRoll(score: Int): BowlingGame {
     val player = nextPlayerToBowl()
     
-    return copy(playerFrames = playerFrames.rollByPlayer(player, score))
+    return copy(players = players.rollByPlayer(player, score))
 }
 
 private fun PersistentList<PlayerFrames>.rollByPlayer(player: Int, roll: Int) =
     set(player, get(player).roll(roll))
 
 fun BowlingGame.nextPlayerToBowl(): Int =
-    playerFrames
+    players
         .indexOfFirst {
-            it.isReadyToBowl() || it.size < playerFrames.first().size
+            it.isReadyToBowl() || it.size < players.first().size
         }
         .coerceAtLeast(0)
 
+fun BowlingGame.maxNextRoll(): Int {
+    return players[nextPlayerToBowl()].maxNextRoll()
+}
+
 fun BowlingGame.isOver(): Boolean =
-    playerFrames.all { it.isOver() }
+    players.all { it.isOver() }
+

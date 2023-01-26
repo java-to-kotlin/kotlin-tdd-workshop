@@ -30,7 +30,12 @@ tasks.test {
 }
 
 configure<com.bnorm.power.PowerAssertGradleExtension> {
-    functions = listOf("kotlin.assert", "kotlin.test.assertTrue", "kotlin.test.assertEquals")
+    functions = listOf(
+        "kotlin.assert",
+        "kotlin.test.assertTrue",
+        "kotlin.test.assertFalse",
+        "kotlin.test.assertEquals"
+    )
 }
 
 compose.desktop {
