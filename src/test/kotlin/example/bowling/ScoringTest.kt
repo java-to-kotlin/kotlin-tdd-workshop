@@ -16,4 +16,4 @@ class ScoringTest {
 
 val newGame = persistentListOf<Any>()
 
-private fun PersistentList<Any>.totalScore(): Int = TODO()
+private fun PersistentList<Any>.totalScore(): Int = 0
