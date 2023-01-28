@@ -11,9 +11,21 @@ class ScoringTest {
         assertTrue(newGame.totalScore() == 0)
         assertTrue(newGame.frames().isEmpty())
     }
+    
+    @Test
+    fun `one roll that is not a strike`() {
+        val game = newGame.roll(5)
+        assertTrue(game.totalScore() == 5)
+        assertTrue(game.frames() == persistentListOf(Frame(pinsDown = 5)))
+    }
 }
 
+data class Frame(val pinsDown: Int)
+
 val newGame = persistentListOf<Any>()
+
+private fun PersistentList<Any>.roll(pinsDown: Int): PersistentList<Any> =
+    TODO("Not yet implemented")
 
 private fun PersistentList<Any>.frames() = this
 
