@@ -8,12 +8,13 @@ import kotlin.test.assertTrue
 class ScoringTest {
     @Test
     fun `new game - no frames, total score 0`() {
-        val game = newGame
-        assertTrue(game.totalScore() == 0)
-        assertTrue(game.isEmpty())
+        assertTrue(newGame.totalScore() == 0)
+        assertTrue(newGame.frames().isEmpty())
     }
 }
 
 val newGame = persistentListOf<Any>()
+
+private fun PersistentList<Any>.frames() = this
 
 private fun PersistentList<Any>.totalScore(): Int = 0
