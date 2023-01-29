@@ -21,7 +21,7 @@ class ScoringTest : AnnotationSpec() {
         checkAll(Arb.int(0..9)) { n ->
             val game = newGame.roll(n)
             assertTrue(game.totalScore() == n)
-            assertTrue(game.frames() == persistentListOf(IncompleteFrame(pinsDown = n)))
+            assertTrue(game.frames() == persistentListOf(IncompleteFrame(firstRoll = n)))
         }
     }
     
@@ -51,11 +51,15 @@ class ScoringTest : AnnotationSpec() {
     }
 }
 
+typealias Game = PersistentList<Frame>
+
 sealed interface Frame {
     val pinsDown: Int
 }
 
-data class IncompleteFrame(override val pinsDown: Int) : Frame
+data class IncompleteFrame(val firstRoll: Int) : Frame {
+    override val pinsDown: Int get() = firstRoll
+}
 
 data class CompleteFrame(val firstRoll: Int, val secondRoll: Int) : Frame {
     override val pinsDown: Int get() = firstRoll + secondRoll
@@ -69,15 +73,17 @@ object Strike : Frame {
     override val pinsDown: Int get() = 10
 }
 
-typealias Game = PersistentList<Frame>
 
 val newGame = persistentListOf<Frame>()
 
-private fun Game.roll(pinsDown: Int): Game {
-    val lastFrame = this.lastOrNull()
+fun Game.roll(pinsDown: Int): Game {
+    val frameInProgress = this.lastOrNull()
     return when {
-        lastFrame is IncompleteFrame -> {
-            val firstRoll = lastFrame.pinsDown
+        pinsDown == 10 ->
+            this + Strike
+        
+        frameInProgress is IncompleteFrame -> {
+            val firstRoll = frameInProgress.firstRoll
             val secondRoll = pinsDown
             this.set(
                 this.lastIndex,
@@ -88,14 +94,11 @@ private fun Game.roll(pinsDown: Int): Game {
             )
         }
         
-        pinsDown == 10 ->
-            this + Strike
-        
         else ->
             this + IncompleteFrame(pinsDown)
     }
 }
 
-private fun Game.frames() = this
+fun Game.frames() = this
 
-private fun Game.totalScore(): Int = firstOrNull()?.pinsDown ?: 0
+fun Game.totalScore(): Int = firstOrNull()?.pinsDown ?: 0
