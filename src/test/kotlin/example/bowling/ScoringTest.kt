@@ -2,6 +2,7 @@ package example.bowling
 
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.plus
 import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
 
@@ -22,11 +23,11 @@ class ScoringTest {
 
 data class Frame(val pinsDown: Int)
 
-val newGame = persistentListOf<Any>()
+val newGame = persistentListOf<Frame>()
 
-private fun PersistentList<Any>.roll(pinsDown: Int): PersistentList<Any> =
-    TODO("Not yet implemented")
+private fun PersistentList<Frame>.roll(pinsDown: Int): PersistentList<Frame> =
+    this + Frame(pinsDown)
 
-private fun PersistentList<Any>.frames() = this
+private fun PersistentList<Frame>.frames() = this
 
-private fun PersistentList<Any>.totalScore(): Int = 0
+private fun PersistentList<Frame>.totalScore(): Int = firstOrNull()?.pinsDown ?: 0
