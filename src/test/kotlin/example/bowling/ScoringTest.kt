@@ -1,12 +1,15 @@
 package example.bowling
 
+import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.plus
-import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
 
-class ScoringTest {
+class ScoringTest : AnnotationSpec() {
     @Test
     fun `new game - no frames, total score 0`() {
         assertTrue(newGame.totalScore() == 0)
@@ -14,10 +17,12 @@ class ScoringTest {
     }
     
     @Test
-    fun `one roll that is not a strike`() {
-        val game = newGame.roll(5)
-        assertTrue(game.totalScore() == 5)
-        assertTrue(game.frames() == persistentListOf(Frame(pinsDown = 5)))
+    suspend fun `one roll that is not a strike`() {
+        checkAll(Arb.int(0..9)) { n ->
+            val game = newGame.roll(n)
+            assertTrue(game.totalScore() == n)
+            assertTrue(game.frames() == persistentListOf(Frame(pinsDown = n)))
+        }
     }
 }
 
