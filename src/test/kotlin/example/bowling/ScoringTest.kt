@@ -54,43 +54,43 @@ class ScoringTest : AnnotationSpec() {
 typealias Game = PersistentList<Frame>
 
 sealed interface Frame {
-    val pinsDown: Int
+    val pinfall: Int
 }
 
 data class IncompleteFrame(val firstRoll: Int) : Frame {
-    override val pinsDown: Int get() = firstRoll
+    override val pinfall: Int get() = firstRoll
 }
 
 sealed interface CompleteFrame : Frame
 
 // See https://en.wikipedia.org/wiki/Glossary_of_bowling
 data class OpenFrame(val firstRoll: Int, val secondRoll: Int) : CompleteFrame {
-    override val pinsDown: Int get() = firstRoll + secondRoll
+    override val pinfall: Int get() = firstRoll + secondRoll
 }
 
 data class Spare(val firstRoll: Int) : CompleteFrame {
-    override val pinsDown: Int get() = 10
+    override val pinfall: Int get() = 10
 }
 
 object Strike : CompleteFrame {
-    override val pinsDown: Int get() = 10
+    override val pinfall: Int get() = 10
 }
 
 
 val newGame = persistentListOf<Frame>()
 
-fun Game.roll(pinsDown: Int): Game {
-    return when(val prev = this.lastOrNull()) {
+fun Game.roll(rollPinfall: Int): Game =
+    when (val prev = this.lastOrNull()) {
         null, is CompleteFrame -> {
-            this + when(pinsDown) {
+            this + when (rollPinfall) {
                 10 -> Strike
-                else -> IncompleteFrame(pinsDown)
+                else -> IncompleteFrame(rollPinfall)
             }
         }
         
         is IncompleteFrame -> {
             val firstRoll = prev.firstRoll
-            val secondRoll = pinsDown
+            val secondRoll = rollPinfall
             this.set(
                 this.lastIndex,
                 when (firstRoll + secondRoll) {
@@ -100,8 +100,7 @@ fun Game.roll(pinsDown: Int): Game {
             )
         }
     }
-}
 
 fun Game.frames() = this
 
-fun Game.totalScore(): Int = firstOrNull()?.pinsDown ?: 0
+fun Game.totalScore(): Int = firstOrNull()?.pinfall ?: 0
