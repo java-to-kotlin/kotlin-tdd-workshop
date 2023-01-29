@@ -39,6 +39,14 @@ class ScoringTest : AnnotationSpec() {
         
         assertTrue(game.totalScore() == 10)
         assertTrue(game.frames() == persistentListOf(Strike))
+
+    }
+    @Test
+    fun `a spare`() {
+        val game = newGame.roll(6).roll(4)
+        
+        assertTrue(game.totalScore() == 10)
+        assertTrue(game.frames() == persistentListOf(Spare(firstRoll=6)))
     }
 }
 
@@ -50,6 +58,10 @@ data class IncompleteFrame(override val pinsDown: Int) : Frame
 
 data class CompleteFrame(val firstRoll: Int, val secondRoll: Int) : Frame {
     override val pinsDown: Int get() = firstRoll + secondRoll
+}
+
+data class Spare(val firstRoll: Int) : Frame {
+    override val pinsDown: Int get() = 10
 }
 
 object Strike : Frame {
