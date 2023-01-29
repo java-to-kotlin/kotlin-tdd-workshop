@@ -116,4 +116,4 @@ fun Game.roll(rollPinfall: Int): Game =
 
 fun Game.frames() = this
 
-fun Game.totalScore(): Int = firstOrNull()?.pinfall ?: 0
+fun Game.totalScore(): Int = sumOf { it.pinfall }
