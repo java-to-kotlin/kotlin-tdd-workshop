@@ -30,7 +30,7 @@ class ScoringTest : AnnotationSpec() {
         val game = newGame.roll(4).roll(3)
         
         assertTrue(game.totalScore() == 7)
-        assertTrue(game.frames() == persistentListOf(CompleteFrame(firstRoll = 4, secondRoll = 3)))
+        assertTrue(game.frames() == persistentListOf(OpenFrame(firstRoll = 4, secondRoll = 3)))
     }
     
     @Test
@@ -61,15 +61,18 @@ data class IncompleteFrame(val firstRoll: Int) : Frame {
     override val pinsDown: Int get() = firstRoll
 }
 
-data class CompleteFrame(val firstRoll: Int, val secondRoll: Int) : Frame {
+sealed interface CompleteFrame : Frame
+
+// See https://en.wikipedia.org/wiki/Glossary_of_bowling
+data class OpenFrame(val firstRoll: Int, val secondRoll: Int) : CompleteFrame {
     override val pinsDown: Int get() = firstRoll + secondRoll
 }
 
-data class Spare(val firstRoll: Int) : Frame {
+data class Spare(val firstRoll: Int) : CompleteFrame {
     override val pinsDown: Int get() = 10
 }
 
-object Strike : Frame {
+object Strike : CompleteFrame {
     override val pinsDown: Int get() = 10
 }
 
@@ -77,25 +80,25 @@ object Strike : Frame {
 val newGame = persistentListOf<Frame>()
 
 fun Game.roll(pinsDown: Int): Game {
-    val frameInProgress = this.lastOrNull()
-    return when {
-        pinsDown == 10 ->
-            this + Strike
+    return when(val prev = this.lastOrNull()) {
+        null, is CompleteFrame -> {
+            this + when(pinsDown) {
+                10 -> Strike
+                else -> IncompleteFrame(pinsDown)
+            }
+        }
         
-        frameInProgress is IncompleteFrame -> {
-            val firstRoll = frameInProgress.firstRoll
+        is IncompleteFrame -> {
+            val firstRoll = prev.firstRoll
             val secondRoll = pinsDown
             this.set(
                 this.lastIndex,
                 when (firstRoll + secondRoll) {
                     10 -> Spare(firstRoll)
-                    else -> CompleteFrame(firstRoll, secondRoll)
+                    else -> OpenFrame(firstRoll, secondRoll)
                 }
             )
         }
-        
-        else ->
-            this + IncompleteFrame(pinsDown)
     }
 }
 
