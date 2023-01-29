@@ -23,11 +23,13 @@ class ScoringTest {
 
 data class Frame(val pinsDown: Int)
 
+typealias Game = PersistentList<Frame>
+
 val newGame = persistentListOf<Frame>()
 
-private fun PersistentList<Frame>.roll(pinsDown: Int): PersistentList<Frame> =
+private fun Game.roll(pinsDown: Int): Game =
     this + Frame(pinsDown)
 
-private fun PersistentList<Frame>.frames() = this
+private fun Game.frames() = this
 
-private fun PersistentList<Frame>.totalScore(): Int = firstOrNull()?.pinsDown ?: 0
+private fun Game.totalScore(): Int = firstOrNull()?.pinsDown ?: 0
