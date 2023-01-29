@@ -60,11 +60,17 @@ typealias Game = PersistentList<Frame>
 
 val newGame = persistentListOf<Frame>()
 
-private fun Game.roll(pinsDown: Int): Game =
-    when (val lastFrame = this.lastOrNull()) {
-        is IncompleteFrame -> this.set(this.lastIndex, CompleteFrame(lastFrame.pinsDown, pinsDown))
-        else -> this + IncompleteFrame(pinsDown)
+private fun Game.roll(pinsDown: Int): Game {
+    val lastFrame = this.lastOrNull()
+    return when {
+        lastFrame is IncompleteFrame ->
+            this.set(this.lastIndex, CompleteFrame(lastFrame.pinsDown, pinsDown))
+        pinsDown == 10 ->
+            this + Strike
+        else ->
+            this + IncompleteFrame(pinsDown)
     }
+}
 
 private fun Game.frames() = this
 
