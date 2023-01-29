@@ -41,7 +41,7 @@ sealed interface Frame {
 data class IncompleteFrame(override val pinsDown: Int) : Frame
 
 data class CompleteFrame(val firstRoll: Int, val secondRoll: Int) : Frame {
-    override val pinsDown: Int get() = TODO()
+    override val pinsDown: Int get() = firstRoll + secondRoll
 }
 
 typealias Game = PersistentList<Frame>
@@ -49,7 +49,10 @@ typealias Game = PersistentList<Frame>
 val newGame = persistentListOf<Frame>()
 
 private fun Game.roll(pinsDown: Int): Game =
-    this + IncompleteFrame(pinsDown)
+    when (val lastFrame = this.lastOrNull()) {
+        is IncompleteFrame -> this.set(this.lastIndex, CompleteFrame(lastFrame.pinsDown, pinsDown))
+        else -> this + IncompleteFrame(pinsDown)
+    }
 
 private fun Game.frames() = this
 
