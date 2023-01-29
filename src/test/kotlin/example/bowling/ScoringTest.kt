@@ -32,6 +32,14 @@ class ScoringTest : AnnotationSpec() {
         assertTrue(game.totalScore() == 7)
         assertTrue(game.frames() == persistentListOf(CompleteFrame(firstRoll = 4, secondRoll = 3)))
     }
+    
+    @Test
+    fun `a strike`() {
+        val game = newGame.roll(10)
+        
+        assertTrue(game.totalScore() == 10)
+        assertTrue(game.frames() == persistentListOf(Strike))
+    }
 }
 
 sealed interface Frame {
@@ -42,6 +50,10 @@ data class IncompleteFrame(override val pinsDown: Int) : Frame
 
 data class CompleteFrame(val firstRoll: Int, val secondRoll: Int) : Frame {
     override val pinsDown: Int get() = firstRoll + secondRoll
+}
+
+object Strike : Frame {
+    override val pinsDown: Int get() = 10
 }
 
 typealias Game = PersistentList<Frame>
