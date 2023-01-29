@@ -26,11 +26,19 @@ class ScoringTest : AnnotationSpec() {
     }
     
     @Test
-    fun `two rolls not a spare`() {
+    fun `two rolls, open frame`() {
         val game = newGame.roll(4).roll(3)
         
         assertTrue(game.totalScore() == 7)
         assertTrue(game.frames() == persistentListOf(OpenFrame(firstRoll = 4, secondRoll = 3)))
+    }
+    
+    @Test
+    fun `two rolls, spare`() {
+        val game = newGame.roll(6).roll(4)
+        
+        assertTrue(game.totalScore() == 10)
+        assertTrue(game.frames() == persistentListOf(Spare(firstRoll = 6)))
     }
     
     @Test
@@ -43,11 +51,16 @@ class ScoringTest : AnnotationSpec() {
     }
     
     @Test
-    fun `a spare`() {
-        val game = newGame.roll(6).roll(4)
+    fun `roll after open frame`() {
+        val game = newGame.roll(3).roll(5).roll(4)
         
-        assertTrue(game.totalScore() == 10)
-        assertTrue(game.frames() == persistentListOf(Spare(firstRoll = 6)))
+        assertTrue(game.totalScore() == 12)
+        assertTrue(
+            game.frames() == persistentListOf(
+                OpenFrame(firstRoll = 3, secondRoll = 5),
+                IncompleteFrame(firstRoll = 4)
+            )
+        )
     }
 }
 
