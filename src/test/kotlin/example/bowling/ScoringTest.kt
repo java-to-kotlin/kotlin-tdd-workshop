@@ -12,8 +12,8 @@ import kotlin.test.assertTrue
 class ScoringTest : AnnotationSpec() {
     @Test
     fun `new game - no frames, total score 0`() {
-        assertTrue(newGame.totalScore() == 0)
         assertTrue(newGame.frames().isEmpty())
+        assertTrue(newGame.totalScore() == 0)
     }
     
     @Test
@@ -29,24 +29,24 @@ class ScoringTest : AnnotationSpec() {
     fun `two rolls, open frame`() {
         val game = newGame.roll(4).roll(3)
         
-        assertTrue(game.totalScore() == 7)
         assertTrue(game.frames() == persistentListOf(OpenFrame(firstRoll = 4, secondRoll = 3)))
+        assertTrue(game.totalScore() == 7)
     }
     
     @Test
     fun `two rolls, spare`() {
         val game = newGame.roll(6).roll(4)
         
-        assertTrue(game.totalScore() == 10)
         assertTrue(game.frames() == persistentListOf(Spare(firstRoll = 6)))
+        assertTrue(game.totalScore() == 10)
     }
     
     @Test
     fun `a strike`() {
         val game = newGame.roll(10)
         
-        assertTrue(game.totalScore() == 10)
         assertTrue(game.frames() == persistentListOf(Strike))
+        assertTrue(game.totalScore() == 10)
         
     }
     
@@ -54,13 +54,26 @@ class ScoringTest : AnnotationSpec() {
     fun `roll after open frame`() {
         val game = newGame.roll(3).roll(5).roll(4)
         
-        assertTrue(game.totalScore() == 12)
         assertTrue(
             game.frames() == persistentListOf(
                 OpenFrame(firstRoll = 3, secondRoll = 5),
                 IncompleteFrame(firstRoll = 4)
             )
         )
+        assertTrue(game.totalScore() == 12)
+    }
+    
+    @Test
+    fun `roll after spare`() {
+        val game = newGame.roll(3).roll(7).roll(4)
+        
+        assertTrue(
+            game.frames() == persistentListOf(
+                Spare(3),
+                IncompleteFrame(4)
+            )
+        )
+        assertTrue(game.totalScore() == 18)
     }
 }
 
