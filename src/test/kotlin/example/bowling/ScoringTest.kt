@@ -102,6 +102,13 @@ object Strike : CompleteFrame {
     override val pinfall: Int get() = 10
 }
 
+data class FrameScore(
+    val frame: Frame,
+    val score: Int
+)
+
+fun Frame.scoredAs(score: Int) =
+    FrameScore(this, score)
 
 val newGame = persistentListOf<Frame>()
 
@@ -129,4 +136,17 @@ fun Game.roll(rollPinfall: Int): Game =
 
 fun Game.frames() = this
 
-fun Game.totalScore(): Int = sumOf { it.pinfall }
+fun Game.totalScore(): Int =
+    this.mapIndexed { i, frame -> frame.scoredAs(scoreForFrame(i)) }
+        .sumOf { it.score }
+
+private fun Game.scoreForFrame(i: Int): Int {
+    val frame = this[i]
+    val pinfall = frame.pinfall
+    val bonus = when(frame) {
+        is Spare -> this.getOrNull(i+1)?.pinfall ?: 0
+        else -> 0
+    }
+    
+    return pinfall + bonus
+}
