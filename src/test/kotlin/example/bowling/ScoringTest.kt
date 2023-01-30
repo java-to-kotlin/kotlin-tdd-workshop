@@ -21,7 +21,9 @@ class ScoringTest : AnnotationSpec() {
         checkAll(Arb.int(0..9)) { n ->
             val game = newGame.roll(n)
             assertTrue(game.totalScore() == n)
-            assertTrue(game.frames() == persistentListOf(IncompleteFrame(firstRoll = n)))
+            assertTrue(game.frames() == persistentListOf(
+                IncompleteFrame(firstRoll = n).scoredAs(n)
+            ))
         }
     }
     
@@ -29,7 +31,9 @@ class ScoringTest : AnnotationSpec() {
     fun `two rolls, open frame`() {
         val game = newGame.roll(4).roll(3)
         
-        assertTrue(game.frames() == persistentListOf(OpenFrame(firstRoll = 4, secondRoll = 3)))
+        assertTrue(game.frames() == persistentListOf(
+            OpenFrame(firstRoll = 4, secondRoll = 3).scoredAs(7)
+        ))
         assertTrue(game.totalScore() == 7)
     }
     
@@ -37,7 +41,9 @@ class ScoringTest : AnnotationSpec() {
     fun `two rolls, spare`() {
         val game = newGame.roll(6).roll(4)
         
-        assertTrue(game.frames() == persistentListOf(Spare(firstRoll = 6)))
+        assertTrue(game.frames() == persistentListOf(
+            Spare(firstRoll = 6).scoredAs(10)
+        ))
         assertTrue(game.totalScore() == 10)
     }
     
@@ -45,9 +51,10 @@ class ScoringTest : AnnotationSpec() {
     fun `a strike`() {
         val game = newGame.roll(10)
         
-        assertTrue(game.frames() == persistentListOf(Strike))
+        assertTrue(game.frames() == persistentListOf(
+            Strike.scoredAs(10)
+        ))
         assertTrue(game.totalScore() == 10)
-        
     }
     
     @Test
@@ -56,8 +63,8 @@ class ScoringTest : AnnotationSpec() {
         
         assertTrue(
             game.frames() == persistentListOf(
-                OpenFrame(firstRoll = 3, secondRoll = 5),
-                IncompleteFrame(firstRoll = 4)
+                OpenFrame(firstRoll = 3, secondRoll = 5).scoredAs(8),
+                IncompleteFrame(firstRoll = 4).scoredAs(4)
             )
         )
         assertTrue(game.totalScore() == 12)
@@ -69,8 +76,8 @@ class ScoringTest : AnnotationSpec() {
         
         assertTrue(
             game.frames() == persistentListOf(
-                Spare(3),
-                IncompleteFrame(4)
+                Spare(3).scoredAs(14),
+                IncompleteFrame(4).scoredAs(4)
             )
         )
         assertTrue(game.totalScore() == 18)
@@ -134,11 +141,11 @@ fun Game.roll(rollPinfall: Int): Game =
         }
     }
 
-fun Game.frames() = this
+fun Game.frames() =
+    mapIndexed { i, frame -> frame.scoredAs(scoreForFrame(i)) }
 
 fun Game.totalScore(): Int =
-    this.mapIndexed { i, frame -> frame.scoredAs(scoreForFrame(i)) }
-        .sumOf { it.score }
+    this.frames().sumOf { it.score }
 
 private fun Game.scoreForFrame(i: Int): Int {
     val frame = this[i]
