@@ -12,79 +12,93 @@ import kotlin.test.assertTrue
 class ScoringTest : AnnotationSpec() {
     @Test
     fun `new game - no frames, total score 0`() {
-        assertTrue(newGame.frames().isEmpty())
-        assertTrue(newGame.totalScore() == 0)
+        val scores = newGame.score()
+        
+        assertTrue(scores.isEmpty())
+        assertTrue(scores.total() == 0)
     }
     
     @Test
     suspend fun `one roll that is not a strike`() {
         checkAll(Arb.int(0..9)) { n ->
-            val game = newGame.roll(n)
-            assertTrue(game.totalScore() == n)
-            assertTrue(game.frames() == persistentListOf(
-                IncompleteFrame(firstRoll = n).scoredAs(n)
-            ))
+            val scores = newGame.roll(n).score()
+            
+            assertTrue(
+                scores == listOf(
+                    IncompleteFrame(firstRoll = n).scoredAs(n)
+                )
+            )
+            assertTrue(scores.total() == n)
         }
     }
     
     @Test
     fun `two rolls, open frame`() {
-        val game = newGame.roll(4).roll(3)
+        val scores = newGame.roll(4).roll(3).score()
         
-        assertTrue(game.frames() == persistentListOf(
-            OpenFrame(firstRoll = 4, secondRoll = 3).scoredAs(7)
-        ))
-        assertTrue(game.totalScore() == 7)
+        assertTrue(
+            scores == listOf(
+                OpenFrame(firstRoll = 4, secondRoll = 3).scoredAs(7)
+            )
+        )
+        assertTrue(scores.total() == 7)
     }
     
     @Test
     fun `two rolls, spare`() {
-        val game = newGame.roll(6).roll(4)
+        val scores = newGame.roll(6).roll(4).score()
         
-        assertTrue(game.frames() == persistentListOf(
-            Spare(firstRoll = 6).scoredAs(10)
-        ))
-        assertTrue(game.totalScore() == 10)
+        assertTrue(
+            scores == listOf(
+                Spare(firstRoll = 6).scoredAs(10)
+            )
+        )
+        assertTrue(scores.total() == 10)
     }
     
     @Test
     fun `a strike`() {
-        val game = newGame.roll(10)
-        
-        assertTrue(game.frames() == persistentListOf(
-            Strike.scoredAs(10)
-        ))
-        assertTrue(game.totalScore() == 10)
+        val scores = newGame.roll(10).score()
+    
+        assertTrue(
+            scores == listOf(
+                Strike.scoredAs(10)
+            )
+        )
+        assertTrue(scores.total() == 10)
     }
     
     @Test
     fun `roll after open frame`() {
-        val game = newGame.roll(3).roll(5).roll(4)
-        
+        val scores = newGame.roll(3).roll(5).roll(4).score()
+    
         assertTrue(
-            game.frames() == persistentListOf(
+            scores == listOf(
                 OpenFrame(firstRoll = 3, secondRoll = 5).scoredAs(8),
                 IncompleteFrame(firstRoll = 4).scoredAs(4)
             )
         )
-        assertTrue(game.totalScore() == 12)
+        assertTrue(scores.total() == 12)
     }
     
     @Test
     fun `roll after spare`() {
-        val game = newGame.roll(3).roll(7).roll(4)
-        
+        val scores = newGame.roll(3).roll(7).roll(4).score()
+    
         assertTrue(
-            game.frames() == persistentListOf(
+            scores == listOf(
                 Spare(3).scoredAs(14),
                 IncompleteFrame(4).scoredAs(4)
             )
         )
-        assertTrue(game.totalScore() == 18)
+        assertTrue(scores.total() == 18)
     }
 }
 
 typealias Game = PersistentList<Frame>
+
+val newGame = persistentListOf<Frame>()
+
 
 sealed interface Frame {
     val pinfall: Int
@@ -109,16 +123,6 @@ object Strike : CompleteFrame {
     override val pinfall: Int get() = 10
 }
 
-data class FrameScore(
-    val frame: Frame,
-    val score: Int
-)
-
-fun Frame.scoredAs(score: Int) =
-    FrameScore(this, score)
-
-val newGame = persistentListOf<Frame>()
-
 fun Game.roll(rollPinfall: Int): Game =
     when (val prev = this.lastOrNull()) {
         null, is CompleteFrame -> {
@@ -141,19 +145,29 @@ fun Game.roll(rollPinfall: Int): Game =
         }
     }
 
-fun Game.frames() =
+data class FrameScore(
+    val frame: Frame,
+    val score: Int
+)
+
+fun Frame.scoredAs(score: Int) =
+    FrameScore(this, score)
+
+typealias GameScores = List<FrameScore>
+
+fun Game.score(): GameScores =
     mapIndexed { i, frame -> frame.scoredAs(scoreForFrame(i)) }
 
-fun Game.totalScore(): Int =
-    this.frames().sumOf { it.score }
 
 private fun Game.scoreForFrame(i: Int): Int {
     val frame = this[i]
     val pinfall = frame.pinfall
-    val bonus = when(frame) {
-        is Spare -> this.getOrNull(i+1)?.pinfall ?: 0
+    val bonus = when (frame) {
+        is Spare -> this.getOrNull(i + 1)?.pinfall ?: 0
         else -> 0
     }
     
     return pinfall + bonus
 }
+
+private fun GameScores.total() = sumOf { it.score }
