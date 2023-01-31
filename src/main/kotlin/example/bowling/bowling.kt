@@ -11,26 +11,28 @@ val newGame = persistentListOf<Frame>()
 
 
 sealed interface Frame {
+    val firstRoll: Int
     val pinfall: Int
 }
 
-data class IncompleteFrame(val firstRoll: Int) : Frame {
+data class IncompleteFrame(override val firstRoll: Int) : Frame {
     override val pinfall: Int get() = firstRoll
 }
 
 sealed interface CompleteFrame : Frame
 
 // See https://en.wikipedia.org/wiki/Glossary_of_bowling
-data class OpenFrame(val firstRoll: Int, val secondRoll: Int) : CompleteFrame {
+data class OpenFrame(override val firstRoll: Int, val secondRoll: Int) : CompleteFrame {
     override val pinfall: Int get() = firstRoll + secondRoll
 }
 
-data class Spare(val firstRoll: Int) : CompleteFrame {
+data class Spare(override val firstRoll: Int) : CompleteFrame {
     override val pinfall: Int get() = 10
 }
 
 object Strike : CompleteFrame {
-    override val pinfall: Int get() = 10
+    override val firstRoll: Int get() = 10
+    override val pinfall: Int get() = firstRoll
 }
 
 fun Game.roll(rollPinfall: Int): Game =
@@ -74,6 +76,7 @@ private fun Game.scoreForFrame(i: Int): Int {
     val pinfall = frame.pinfall
     val bonus = when (frame) {
         is Spare -> this.getOrNull(i + 1)?.pinfall ?: 0
+        Strike -> this.getOrNull(i + 1)?.firstRoll ?: 0
         else -> 0
     }
     
