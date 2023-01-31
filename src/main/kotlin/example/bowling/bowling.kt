@@ -28,6 +28,8 @@ data class OpenFrame(override val firstRoll: Int, val secondRoll: Int) : Complet
 
 data class Spare(override val firstRoll: Int) : CompleteFrame {
     override val pinfall: Int get() = 10
+    
+    val secondRoll: Int get() = pinfall - firstRoll
 }
 
 object Strike : CompleteFrame {
@@ -75,8 +77,8 @@ private fun Game.scoreForFrame(i: Int): Int {
     val frame = this[i]
     val pinfall = frame.pinfall
     val bonus = when (frame) {
-        is Spare -> this.getOrNull(i + 1)?.pinfall ?: 0
-        Strike -> this.getOrNull(i + 1)?.firstRoll ?: 0
+        is Spare -> bonus(forFrame = i, bonusRolls = 1)
+        Strike -> bonus(forFrame = i,  bonusRolls = 2)
         else -> 0
     }
     
@@ -84,3 +86,14 @@ private fun Game.scoreForFrame(i: Int): Int {
 }
 
 fun GameScores.total() = sumOf { it.score }
+
+
+private fun Frame.rolls() = when (this) {
+    is IncompleteFrame -> listOf(firstRoll)
+    is OpenFrame -> listOf(firstRoll, secondRoll)
+    is Spare -> listOf(firstRoll, secondRoll)
+    is Strike -> listOf(firstRoll)
+}
+
+private fun List<Frame>.bonus(forFrame: Int, bonusRolls: Int) =
+    drop(forFrame+1).flatMap { it.rolls() }.take(bonusRolls).sum()
