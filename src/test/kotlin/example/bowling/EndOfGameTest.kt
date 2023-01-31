@@ -14,9 +14,5 @@ class EndOfGameTest : AnnotationSpec() {
             
             assertTrue(game.isOver())
         }
-        
     }
 }
-
-private fun Game.isOver(): Boolean = false
-

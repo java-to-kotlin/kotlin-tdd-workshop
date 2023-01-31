@@ -97,3 +97,8 @@ private fun Frame.rolls() = when (this) {
 
 private fun List<Frame>.bonus(forFrame: Int, bonusRolls: Int) =
     drop(forFrame+1).flatMap { it.rolls() }.take(bonusRolls).sum()
+
+
+fun Game.isOver(): Boolean =
+    size == 10
+
