@@ -129,4 +129,17 @@ class ScoringTest : AnnotationSpec() {
         )
         assertTrue(scores.total() == 16)
     }
+    
+    @Test
+    fun `open frame after strike`() {
+        val scores = newGame.roll(10).roll(3).roll(2).score()
+        
+        assertTrue(
+            scores == listOf(
+                Strike.scoredAs(15),
+                OpenFrame(3,2).scoredAs(5)
+            )
+        )
+        assertTrue(scores.total() == 20)
+    }
 }
