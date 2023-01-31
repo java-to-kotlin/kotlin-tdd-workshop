@@ -116,4 +116,17 @@ class ScoringTest : AnnotationSpec() {
         )
         assertTrue(scores.total() == 18)
     }
+    
+    @Test
+    fun `single roll after strike`() {
+        val scores = newGame.roll(10).roll(3).score()
+        
+        assertTrue(
+            scores == listOf(
+                Strike.scoredAs(13),
+                IncompleteFrame(3).scoredAs(3)
+            )
+        )
+        assertTrue(scores.total() == 16)
+    }
 }
