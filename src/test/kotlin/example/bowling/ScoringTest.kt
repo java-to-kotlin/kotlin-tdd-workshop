@@ -142,4 +142,44 @@ class ScoringTest : AnnotationSpec() {
         )
         assertTrue(scores.total() == 20)
     }
+    
+    @Test
+    fun `spare after strike`() {
+        val scores = newGame.roll(10).roll(4).roll(6).score()
+        
+        assertTrue(
+            scores == listOf(
+                Strike.scoredAs(20),
+                Spare(4).scoredAs(10)
+            )
+        )
+        assertTrue(scores.total() == 30)
+    }
+    
+    @Test
+    fun `two strikes in a row`() {
+        val scores = newGame.roll(10).roll(10).score()
+    
+        assertTrue(
+            scores == listOf(
+                Strike.scoredAs(20),
+                Strike.scoredAs(10)
+            )
+        )
+        assertTrue(scores.total() == 30)
+    }
+    
+    @Test
+    fun `three strikes in a row`() {
+        val scores = newGame.roll(10).roll(10).roll(10).score()
+        
+        assertTrue(
+            scores == listOf(
+                Strike.scoredAs(30),
+                Strike.scoredAs(20),
+                Strike.scoredAs(10)
+            )
+        )
+        assertTrue(scores.total() == 60)
+    }
 }
