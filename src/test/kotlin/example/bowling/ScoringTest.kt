@@ -2,16 +2,9 @@ package example.bowling
 
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.property.Arb
-import io.kotest.property.arbitrary.flatMap
-import io.kotest.property.arbitrary.int
-import io.kotest.property.arbitrary.map
 import io.kotest.property.checkAll
 import kotlin.test.assertTrue
 
-fun Arb.Companion.roll(max: Int = 10) = int(0..max)
-
-fun Arb.Companion.openFrame(): Arb<Pair<Int, Int>> =
-    roll(max = 9).flatMap { i -> roll(max = 9 - i).map { j -> Pair(first = i, second = j) } }
 
 class ScoringTest : AnnotationSpec() {
     @Test
