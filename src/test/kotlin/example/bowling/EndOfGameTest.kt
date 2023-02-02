@@ -28,4 +28,17 @@ class EndOfGameTest : AnnotationSpec() {
             assertTrue(!game.isOver())
         }
     }
+    
+    @Test
+    suspend fun `game is not over if last roll is a strike`() {
+        checkAll(Arb.list(Arb.openFrame(), 9..9)) { frames ->
+            val game = frames
+                .fold(newGame) { game, (first, second) ->
+                    game.roll(first).roll(second)
+                }
+                .roll(10)
+            
+            assertTrue(!game.isOver())
+        }
+    }
 }
