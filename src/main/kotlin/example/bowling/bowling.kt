@@ -100,5 +100,5 @@ private fun List<Frame>.bonus(forFrame: Int, bonusRolls: Int) =
 
 
 fun Game.isOver(): Boolean =
-    size == 10
+    size == 10 && (last() !is Spare)
 
