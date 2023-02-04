@@ -11,11 +11,16 @@ typealias MultiplayerGame = PersistentList<Game>
 fun newGame(playerCount: Int): MultiplayerGame =
     (1..playerCount).map { newGame }.toPersistentList()
 
-fun MultiplayerGame.playerToRoll(): Int = 0
+fun MultiplayerGame.playerToRoll(): Int =
+    indices.firstOrNull { p -> get(p).size != first().size } ?: 0
+
 
 @JvmName("multiplayerGameRoll")
-fun MultiplayerGame.roll(rollPinfall: Int): MultiplayerGame =
-    TODO()
+fun MultiplayerGame.roll(rollPinfall: Int): MultiplayerGame  {
+    val p = playerToRoll()
+    
+    return set(p, get(p).roll(rollPinfall))
+}
 
 typealias Game = PersistentList<Frame>
 
