@@ -13,10 +13,18 @@ fun newGame(playerCount: Int): MultiplayerGame =
 
 fun MultiplayerGame.playerToRoll(): Int =
     (0..lastIndex)
-        .firstOrNull { p ->
-            get(p).lastOrNull() !is CompleteFrame ||
-            framesPlayedBy(p) < framesPlayedBy(0)
-        } ?: 0
+        .firstOrNull { p -> playerHasUnfinishedFrame(p) || framesPlayedBy(p) < framesPlayedBy(0) }
+        ?: 0
+
+private fun MultiplayerGame.playerHasUnfinishedFrame(p: Int): Boolean {
+    val lastFrame = get(p).lastOrNull()
+    
+    val unfinishedFrame = when (framesPlayedBy(p)) {
+        10 -> lastFrame !is CompleteFinalFrame
+        else -> lastFrame !is CompleteFrame
+    }
+    return unfinishedFrame
+}
 
 fun MultiplayerGame.scores(): List<GameScores> = map { it.score() }
 
@@ -27,7 +35,7 @@ fun MultiplayerGame.isOver() =
     all { it.isOver() }
 
 @JvmName("multiplayerGameRoll")
-fun MultiplayerGame.roll(rollPinfall: Int): MultiplayerGame  {
+fun MultiplayerGame.roll(rollPinfall: Int): MultiplayerGame {
     val p = playerToRoll()
     
     return set(p, get(p).roll(rollPinfall))
@@ -99,12 +107,15 @@ fun Game.roll(rollPinfall: Int): Game =
     when (val prev = this.lastOrNull()) {
         null ->
             newFrame(rollPinfall)
+        
         is CompleteFrame -> when (size) {
             10 -> completeLastFrame(prev, rollPinfall)
             else -> newFrame(rollPinfall)
         }
+        
         is IncompleteFrame ->
             completeFrame(prev, rollPinfall)
+        
         is FirstBonusRollForStrike ->
             set(lastIndex, BonusRollsForStrike(prev.strike, prev.bonusRoll1, rollPinfall))
     }
