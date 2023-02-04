@@ -13,6 +13,9 @@ fun newGame(playerCount: Int): MultiplayerGame =
 
 fun MultiplayerGame.playerToRoll(): Int = 0
 
+@JvmName("multiplayerGameRoll")
+fun MultiplayerGame.roll(rollPinfall: Int): MultiplayerGame =
+    TODO()
 
 typealias Game = PersistentList<Frame>
 
