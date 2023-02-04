@@ -12,10 +12,10 @@ fun newGame(playerCount: Int): MultiplayerGame =
     (1..playerCount).map { newGame }.toPersistentList()
 
 fun MultiplayerGame.playerToRoll(): Int =
-    (1..lastIndex)
+    (0..lastIndex)
         .firstOrNull { p ->
-            framesPlayedBy(p) < framesPlayedBy(p-1)
-                && get(p-1).last() is CompleteFrame
+            get(p).lastOrNull() !is CompleteFrame ||
+            framesPlayedBy(p) < framesPlayedBy(0)
         } ?: 0
 
 fun MultiplayerGame.scores(): List<GameScores> = map { it.score() }
