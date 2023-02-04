@@ -22,6 +22,8 @@ fun MultiplayerGame.scores(): List<GameScores> = map { it.score() }
 
 private fun MultiplayerGame.framesPlayedBy(p: Int) = get(p).size
 
+@JvmName("multiplayerGameIsOver")
+fun MultiplayerGame.isOver() = false
 
 @JvmName("multiplayerGameRoll")
 fun MultiplayerGame.roll(rollPinfall: Int): MultiplayerGame  {
