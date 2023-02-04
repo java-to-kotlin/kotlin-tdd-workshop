@@ -20,4 +20,47 @@ class EndOfMultiplayerGameTest : AnnotationSpec() {
         assertTrue(game.isOver())
     }
     
+    @Test
+    fun `game is over when all players have played bonus rolls`() {
+        val lastRound = (1..9).fold(newGame(3)) { game, _ ->
+            (1..3).fold(game) { turn, _ ->
+                turn
+                    .roll(1)
+                    .also { assertTrue(!it.isOver()) }
+                    .roll(2)
+            }
+        }
+        
+        assertTrue(!lastRound.isOver())
+        
+        val endGame = lastRound
+            // Player 0 rolls a final open frame
+            .roll(6)
+            .roll(3)
+            .also {
+                assertTrue(it[0].isOver())
+                assertTrue(!it.isOver())
+            }
+            // Player 1 rolls a strike and two bonus rolls
+            .roll(10)
+            .also { assertTrue(!it.isOver()) }
+            .roll(1)
+            .also { assertTrue(!it.isOver()) }
+            .roll(2)
+            .also {
+                assertTrue(it[1].isOver())
+                assertTrue(!it.isOver())
+            }
+            // Player 2 rolls a spare and one bonus roll
+            .roll(6)
+            .also { assertTrue(!it.isOver()) }
+            .roll(4)
+            .also { assertTrue(!it.isOver()) }
+            .roll(7)
+            .also {
+                assertTrue(it[2].isOver())
+            }
+        
+        assertTrue(endGame.isOver())
+    }
 }
