@@ -22,7 +22,7 @@ data class IncompleteFrame(override val firstRoll: Int) : Frame {
 sealed interface CompleteFrame : Frame
 
 // See https://en.wikipedia.org/wiki/Glossary_of_bowling
-data class OpenFrame(override val firstRoll: Int, val secondRoll: Int) : CompleteFrame, CompleteFinalFrame {
+data class OpenFrame(override val firstRoll: Int, val secondRoll: Int) : CompleteFinalFrame {
     override val pinfall: Int get() = firstRoll + secondRoll
 }
 
@@ -39,7 +39,7 @@ object Strike : CompleteFrame {
     override fun toString() = "Strike"
 }
 
-sealed interface CompleteFinalFrame : Frame
+sealed interface CompleteFinalFrame : CompleteFrame
 
 data class BonusRollForSpare(
     val spare: Spare,
@@ -50,15 +50,35 @@ data class BonusRollForSpare(
     override val pinfall get() = spare.pinfall + bonusRoll
 }
 
+data class FirstBonusRollForStrike(
+    val strike: Strike,
+    val bonusRoll1: Int
+) : Frame {
+    override val firstRoll: Int get() = strike.firstRoll
+    override val pinfall get() = strike.pinfall + bonusRoll1
+}
+
+data class BonusRollsForStrike(
+    val strike: Strike,
+    val bonusRoll1: Int,
+    val bonusRoll2: Int
+) : CompleteFinalFrame {
+    override val firstRoll: Int get() = strike.firstRoll
+    override val pinfall get() = strike.pinfall + bonusRoll1 + bonusRoll2
+}
+
 fun Game.roll(rollPinfall: Int): Game =
     when (val prev = this.lastOrNull()) {
-        null -> newFrame(rollPinfall)
+        null ->
+            newFrame(rollPinfall)
         is CompleteFrame -> when (size) {
             10 -> completeLastFrame(prev, rollPinfall)
             else -> newFrame(rollPinfall)
         }
-        is IncompleteFrame -> completeFrame(prev, rollPinfall)
-        is BonusRollForSpare -> this
+        is IncompleteFrame ->
+            completeFrame(prev, rollPinfall)
+        is FirstBonusRollForStrike ->
+            set(lastIndex, BonusRollsForStrike(prev.strike, prev.bonusRoll1, rollPinfall))
     }
 
 private fun Game.completeFrame(
@@ -80,7 +100,8 @@ private fun Game.completeLastFrame(
     rollPinfall: Int
 ) = when (prev) {
     is Spare -> set(lastIndex, BonusRollForSpare(prev, rollPinfall))
-    else -> this
+    is Strike -> set(lastIndex, FirstBonusRollForStrike(prev, rollPinfall))
+    else -> this // ignore rolls after the end of the game
 }
 
 private fun Game.newFrame(rollPinfall: Int) = this + when (rollPinfall) {
@@ -123,6 +144,8 @@ private fun Frame.rolls() = when (this) {
     is Spare -> listOf(firstRoll, secondRoll)
     is Strike -> listOf(firstRoll)
     is BonusRollForSpare -> listOf(firstRoll, secondRoll, bonusRoll)
+    is FirstBonusRollForStrike -> listOf(strike.firstRoll, bonusRoll1)
+    is BonusRollsForStrike -> listOf(strike.firstRoll, bonusRoll1, bonusRoll2)
 }
 
 private fun List<Frame>.bonus(forFrame: Int, bonusRolls: Int) =
