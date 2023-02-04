@@ -11,7 +11,7 @@ typealias MultiplayerGame = PersistentList<Game>
 fun newGame(playerCount: Int): MultiplayerGame =
     (1..playerCount).map { newGame }.toPersistentList()
 
-fun MultiplayerGame.playerToRoll(): Int =
+fun MultiplayerGame.nextPlayerToBowl(): Int =
     (0..lastIndex)
         .firstOrNull { p -> playerHasUnfinishedFrame(p) || framesPlayedBy(p) < framesPlayedBy(0) }
         ?: 0
@@ -36,12 +36,15 @@ fun MultiplayerGame.isOver() =
 
 @JvmName("multiplayerGameRoll")
 fun MultiplayerGame.roll(rollPinfall: Int): MultiplayerGame {
-    val p = playerToRoll()
+    val p = nextPlayerToBowl()
     
     return set(p, get(p).roll(rollPinfall))
 }
 
 typealias Game = PersistentList<Frame>
+
+val framesPerGame = 10
+val pinCount = 10
 
 val newGame = persistentListOf<Frame>()
 
@@ -63,13 +66,13 @@ data class OpenFrame(override val firstRoll: Int, val secondRoll: Int) : Complet
 }
 
 data class Spare(override val firstRoll: Int) : CompleteFrame {
-    override val pinfall: Int get() = 10
+    override val pinfall: Int get() = pinCount
     
     val secondRoll: Int get() = pinfall - firstRoll
 }
 
 object Strike : CompleteFrame {
-    override val firstRoll: Int get() = 10
+    override val firstRoll: Int get() = pinCount
     override val pinfall: Int get() = firstRoll
     
     override fun toString() = "Strike"
@@ -128,7 +131,7 @@ private fun Game.completeFrame(
     return set(
         lastIndex,
         when (firstRoll + secondRoll) {
-            10 -> Spare(firstRoll)
+            pinCount -> Spare(firstRoll)
             else -> OpenFrame(firstRoll, secondRoll)
         }
     )
@@ -144,7 +147,7 @@ private fun Game.completeLastFrame(
 }
 
 private fun Game.newFrame(rollPinfall: Int) = this + when (rollPinfall) {
-    10 -> Strike
+    pinCount -> Strike
     else -> IncompleteFrame(rollPinfall)
 }
 
@@ -192,5 +195,4 @@ private fun List<Frame>.bonus(forFrame: Int, bonusRolls: Int) =
 
 
 fun Game.isOver(): Boolean =
-    size == 10 && (last() is CompleteFinalFrame)
-
+    size == framesPerGame && (last() is CompleteFinalFrame)
