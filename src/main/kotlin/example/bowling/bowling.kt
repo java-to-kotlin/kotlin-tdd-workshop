@@ -13,7 +13,12 @@ fun newGame(playerCount: Int): MultiplayerGame =
 
 fun MultiplayerGame.playerToRoll(): Int =
     (1..lastIndex)
-        .firstOrNull { p -> framesPlayedBy(p) < framesPlayedBy(p-1) } ?: 0
+        .firstOrNull { p ->
+            framesPlayedBy(p) < framesPlayedBy(p-1)
+                && get(p-1).last() is CompleteFrame
+        } ?: 0
+
+fun MultiplayerGame.scores(): List<GameScores> = map { it.score() }
 
 private fun MultiplayerGame.framesPlayedBy(p: Int) = get(p).size
 
