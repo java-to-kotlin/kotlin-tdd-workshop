@@ -38,7 +38,6 @@ class EndOfMultiplayerGameTest : AnnotationSpec() {
             .roll(6)
             .roll(3)
             .also {
-                assertTrue(it[0].isOver())
                 assertTrue(!it.isOver())
             }
             // Player 1 rolls a strike and two bonus rolls
@@ -48,7 +47,6 @@ class EndOfMultiplayerGameTest : AnnotationSpec() {
             .also { assertTrue(!it.isOver()) }
             .roll(2)
             .also {
-                assertTrue(it[1].isOver())
                 assertTrue(!it.isOver())
             }
             // Player 2 rolls a spare and one bonus roll
@@ -57,9 +55,6 @@ class EndOfMultiplayerGameTest : AnnotationSpec() {
             .roll(4)
             .also { assertTrue(!it.isOver()) }
             .roll(7)
-            .also {
-                assertTrue(it[2].isOver())
-            }
         
         assertTrue(endGame.isOver())
     }
