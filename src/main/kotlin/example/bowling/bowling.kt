@@ -35,6 +35,8 @@ data class Spare(override val firstRoll: Int) : CompleteFrame {
 object Strike : CompleteFrame {
     override val firstRoll: Int get() = 10
     override val pinfall: Int get() = firstRoll
+    
+    override fun toString() = "Strike"
 }
 
 sealed interface CompleteFinalFrame : Frame

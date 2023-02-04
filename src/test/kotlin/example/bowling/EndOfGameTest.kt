@@ -42,7 +42,7 @@ class EndOfGameTest : AnnotationSpec() {
             Arb.roll(),
             Arb.roll()
         ) { frames, bonusRoll1, bonusRoll2 ->
-            val game = frames
+            frames
                 .fold(newGame) { game, (first, second) ->
                     game.roll(first).roll(second)
                 }
@@ -51,8 +51,7 @@ class EndOfGameTest : AnnotationSpec() {
                 .roll(bonusRoll1)
                 .also { assertTrue(!it.isOver()) }
                 .roll(bonusRoll2)
-            
-            assertTrue(game.isOver())
+                .also { assertTrue(it.isOver()) }
         }
     }
 }
