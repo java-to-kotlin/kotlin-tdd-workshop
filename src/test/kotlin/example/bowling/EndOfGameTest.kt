@@ -17,15 +17,21 @@ class EndOfGameTest : AnnotationSpec() {
     }
     
     @Test
-    suspend fun `game is not over if last roll is a spare`() {
-        checkAll(Arb.list(Arb.openFrame(), 9..9), Arb.spare()) { frames, lastFrame ->
+    suspend fun `game is over after one bonus roll when last frame is a spare`() {
+        checkAll(
+            Arb.list(Arb.openFrame(), 9..9),
+            Arb.spare(),
+            Arb.roll()
+        ) { frames, lastFrame, bonusRoll ->
             val game = frames
                 .fold(newGame) { game, (first, second) ->
                     game.roll(first).roll(second)
                 }
                 .roll(lastFrame.first).roll(lastFrame.second)
+                .also { ! it.isOver() }
+                .roll(bonusRoll)
             
-            assertTrue(!game.isOver())
+            assertTrue(game.isOver())
         }
     }
     
