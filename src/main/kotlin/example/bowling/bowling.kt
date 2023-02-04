@@ -3,6 +3,17 @@ package example.bowling
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.plus
+import kotlinx.collections.immutable.toPersistentList
+
+
+typealias MultiplayerGame = PersistentList<Game>
+
+fun newGame(playerCount: Int): MultiplayerGame =
+    (1..playerCount).map { newGame }.toPersistentList()
+
+fun MultiplayerGame.playerToRoll(): Int {
+    TODO()
+}
 
 
 typealias Game = PersistentList<Frame>
