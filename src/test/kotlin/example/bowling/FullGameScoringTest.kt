@@ -8,14 +8,14 @@ import kotlin.test.assertTrue
 class FullGameScoringTest : AnnotationSpec() {
     @Test
     fun `all strikes scores 300`() {
-        val game = (1..10).fold(newGame) { game, _ -> game.roll(10) }.roll(10).roll(10)
+        val game = (1..10).fold(newGame) { game, _ -> game.roll(10.pins) }.roll(10.pins).roll(10.pins)
         assertTrue(game.isOver())
         assertTrue(game.score().total() == 300)
     }
     
     @Test
     fun `all spares score includes bonus roll`() {
-        val game = (1..10).fold(newGame) { game, _ -> game.roll(5).roll(5) }.roll(5)
+        val game = (1..10).fold(newGame) { game, _ -> game.roll(5.pins).roll(5.pins) }.roll(5.pins)
         
         assertTrue(game.isOver())
         assertTrue(game.score().total() == 150)
@@ -23,7 +23,7 @@ class FullGameScoringTest : AnnotationSpec() {
     
     @Test
     fun `all open frames`() {
-        val game = (1..10).fold(newGame) { game, _ -> game.roll(9).roll(0) }
+        val game = (1..10).fold(newGame) { game, _ -> game.roll(9.pins).roll(0.pins) }
         
         assertTrue(game.isOver())
         assertTrue(game.score().total() == 90)

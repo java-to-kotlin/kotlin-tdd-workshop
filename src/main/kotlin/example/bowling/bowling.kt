@@ -35,7 +35,7 @@ fun MultiplayerGame.isOver() =
     all { it.isOver() }
 
 @JvmName("multiplayerGameRoll")
-fun MultiplayerGame.roll(rollPinfall: Int): MultiplayerGame {
+fun MultiplayerGame.roll(rollPinfall: PinCount): MultiplayerGame {
     val p = nextPlayerToBowl()
     
     return set(p, get(p).roll(rollPinfall))
@@ -44,36 +44,34 @@ fun MultiplayerGame.roll(rollPinfall: Int): MultiplayerGame {
 typealias Game = PersistentList<Frame>
 
 val framesPerGame = 10
-val pinCount = 10
 
 val newGame = persistentListOf<Frame>()
 
 
 sealed interface Frame {
-    val firstRoll: Int
-    val pinfall: Int
+    val firstRoll: PinCount
+    val secondRoll: PinCount?
 }
 
-data class IncompleteFrame(override val firstRoll: Int) : Frame {
-    override val pinfall: Int get() = firstRoll
+data class IncompleteFrame(override val firstRoll: PinCount) : Frame {
+    override val secondRoll: PinCount? get() = null
 }
 
 sealed interface CompleteFrame : Frame
 
 // See https://en.wikipedia.org/wiki/Glossary_of_bowling
-data class OpenFrame(override val firstRoll: Int, val secondRoll: Int) : CompleteFinalFrame {
-    override val pinfall: Int get() = firstRoll + secondRoll
-}
+data class OpenFrame(
+    override val firstRoll: PinCount,
+    override val secondRoll: PinCount
+) : CompleteFinalFrame
 
-data class Spare(override val firstRoll: Int) : CompleteFrame {
-    override val pinfall: Int get() = pinCount
-    
-    val secondRoll: Int get() = pinfall - firstRoll
+data class Spare(override val firstRoll: PinCount) : CompleteFrame {
+    override val secondRoll: PinCount get() = PinCount.MAX - firstRoll
 }
 
 object Strike : CompleteFrame {
-    override val firstRoll: Int get() = pinCount
-    override val pinfall: Int get() = firstRoll
+    override val firstRoll: PinCount get() = PinCount.MAX
+    override val secondRoll: PinCount? get() = null
     
     override fun toString() = "Strike"
 }
@@ -82,31 +80,23 @@ sealed interface CompleteFinalFrame : CompleteFrame
 
 data class BonusRollForSpare(
     val spare: Spare,
-    val bonusRoll: Int
-) : CompleteFinalFrame {
-    override val firstRoll: Int get() = spare.firstRoll
-    val secondRoll get() = spare.secondRoll
-    override val pinfall get() = spare.pinfall + bonusRoll
+    val bonusRoll: PinCount
+) : Frame by spare, CompleteFinalFrame {
+    override val secondRoll: PinCount get() = spare.secondRoll
 }
 
 data class FirstBonusRollForStrike(
     val strike: Strike,
-    val bonusRoll1: Int
-) : Frame {
-    override val firstRoll: Int get() = strike.firstRoll
-    override val pinfall get() = strike.pinfall + bonusRoll1
-}
+    val bonusRoll1: PinCount
+) : Frame by Strike
 
 data class BonusRollsForStrike(
     val strike: Strike,
-    val bonusRoll1: Int,
-    val bonusRoll2: Int
-) : CompleteFinalFrame {
-    override val firstRoll: Int get() = strike.firstRoll
-    override val pinfall get() = strike.pinfall + bonusRoll1 + bonusRoll2
-}
+    val bonusRoll1: PinCount,
+    val bonusRoll2: PinCount
+) : Frame by Strike, CompleteFinalFrame
 
-fun Game.roll(rollPinfall: Int): Game =
+fun Game.roll(rollPinfall: PinCount): Game =
     when (val prev = this.lastOrNull()) {
         null ->
             newFrame(rollPinfall)
@@ -125,13 +115,13 @@ fun Game.roll(rollPinfall: Int): Game =
 
 private fun Game.completeFrame(
     prev: IncompleteFrame,
-    secondRoll: Int
+    secondRoll: PinCount
 ): PersistentList<Frame> {
     val firstRoll = prev.firstRoll
     return set(
         lastIndex,
         when (firstRoll + secondRoll) {
-            pinCount -> Spare(firstRoll)
+            PinCount.MAX -> Spare(firstRoll)
             else -> OpenFrame(firstRoll, secondRoll)
         }
     )
@@ -139,48 +129,54 @@ private fun Game.completeFrame(
 
 private fun Game.completeLastFrame(
     prev: Frame,
-    rollPinfall: Int
+    rollPinfall: PinCount
 ) = when (prev) {
     is Spare -> set(lastIndex, BonusRollForSpare(prev, rollPinfall))
     is Strike -> set(lastIndex, FirstBonusRollForStrike(prev, rollPinfall))
     else -> this // ignore rolls after the end of the game
 }
 
-private fun Game.newFrame(rollPinfall: Int) = this + when (rollPinfall) {
-    pinCount -> Strike
+private fun Game.newFrame(rollPinfall: PinCount) = this + when (rollPinfall) {
+    PinCount.MAX -> Strike
     else -> IncompleteFrame(rollPinfall)
 }
 
 data class FrameScore(
-    val frame: Frame,
-    val score: Int
+    val firstRoll: PinCount,
+    val secondRoll: PinCount? = null,
+    val bonus: Int = 0
 )
 
-fun Frame.scoredAs(score: Int) =
-    FrameScore(this, score)
+fun FrameScore.total() =
+    firstRoll.score() + (secondRoll?.score() ?: 0) + bonus
 
 typealias GameScores = List<FrameScore>
 
 fun Game.score(): GameScores =
-    mapIndexed { i, frame -> frame.scoredAs(scoreForFrame(i)) }
+    mapIndexed { i, frame ->
+        scoreForFrame(i)
+    }
 
 
-private fun Game.scoreForFrame(i: Int): Int {
+private fun Game.scoreForFrame(i: Int): FrameScore {
     val frame = this[i]
-    val pinfall = frame.pinfall
     val bonus = when (frame) {
         is Spare -> bonus(forFrame = i, bonusRolls = 1)
         Strike -> bonus(forFrame = i, bonusRolls = 2)
-        else -> 0
+        is BonusRollForSpare -> frame.bonusRoll.score()
+        is BonusRollsForStrike -> frame.bonusRoll1.score() + frame.bonusRoll2.score()
+        is OpenFrame -> 0
+        is FirstBonusRollForStrike -> frame.bonusRoll1.score()
+        is IncompleteFrame -> 0
     }
     
-    return pinfall + bonus
+    return FrameScore(frame.firstRoll, frame.secondRoll, bonus)
 }
 
-fun GameScores.total() = sumOf { it.score }
+fun GameScores.total() = sumOf { it.total() }
 
 
-private fun Frame.rolls() = when (this) {
+private fun Frame.rolls(): List<PinCount> = when (this) {
     is IncompleteFrame -> listOf(firstRoll)
     is OpenFrame -> listOf(firstRoll, secondRoll)
     is Spare -> listOf(firstRoll, secondRoll)
@@ -191,7 +187,7 @@ private fun Frame.rolls() = when (this) {
 }
 
 private fun List<Frame>.bonus(forFrame: Int, bonusRolls: Int) =
-    drop(forFrame + 1).flatMap { it.rolls() }.take(bonusRolls).sum()
+    drop(forFrame + 1).flatMap { it.rolls() }.map { it.score() }.take(bonusRolls).sum()
 
 
 fun Game.isOver(): Boolean =

@@ -46,7 +46,7 @@ class EndOfGameTest : AnnotationSpec() {
                 .fold(newGame) { game, (first, second) ->
                     game.roll(first).roll(second)
                 }
-                .roll(10)
+                .roll(10.pins)
                 .also { assertTrue(!it.isOver()) }
                 .roll(bonusRoll1)
                 .also { assertTrue(!it.isOver()) }

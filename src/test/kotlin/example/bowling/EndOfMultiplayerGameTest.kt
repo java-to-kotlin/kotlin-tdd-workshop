@@ -11,9 +11,9 @@ class EndOfMultiplayerGameTest : AnnotationSpec() {
             (1..3).fold(game) { turn, _ ->
                 turn
                     .also { assertTrue(!it.isOver()) }
-                    .roll(1)
+                    .roll(1.pins)
                     .also { assertTrue(!it.isOver()) }
-                    .roll(2)
+                    .roll(2.pins)
             }
         }
         
@@ -25,9 +25,9 @@ class EndOfMultiplayerGameTest : AnnotationSpec() {
         val lastRound = (1..9).fold(newGame(3)) { game, _ ->
             (1..3).fold(game) { turn, _ ->
                 turn
-                    .roll(1)
+                    .roll(1.pins)
                     .also { assertTrue(!it.isOver()) }
-                    .roll(2)
+                    .roll(2.pins)
             }
         }
         
@@ -35,26 +35,26 @@ class EndOfMultiplayerGameTest : AnnotationSpec() {
         
         val endGame = lastRound
             // Player 0 rolls a final open frame
-            .roll(6)
-            .roll(3)
+            .roll(6.pins)
+            .roll(3.pins)
             .also {
                 assertTrue(!it.isOver())
             }
             // Player 1 rolls a strike and two bonus rolls
-            .roll(10)
+            .roll(10.pins)
             .also { assertTrue(!it.isOver()) }
-            .roll(1)
+            .roll(1.pins)
             .also { assertTrue(!it.isOver()) }
-            .roll(2)
+            .roll(2.pins)
             .also {
                 assertTrue(!it.isOver())
             }
             // Player 2 rolls a spare and one bonus roll
-            .roll(6)
+            .roll(6.pins)
             .also { assertTrue(!it.isOver()) }
-            .roll(4)
+            .roll(4.pins)
             .also { assertTrue(!it.isOver()) }
-            .roll(7)
+            .roll(7.pins)
         
         assertTrue(endGame.isOver())
     }

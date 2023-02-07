@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import example.bowling.PinCount.Companion
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.plus
@@ -209,6 +210,7 @@ private fun PlayerSetUp(
                                 playerNames = when {
                                     state.playerNames.size == i ->
                                         state.playerNames + newName
+                                    
                                     else ->
                                         state.playerNames.set(i, newName)
                                 }
@@ -314,7 +316,7 @@ fun PlayerFramesView(
         (0 until framesPerGame).forEach { i ->
             item {
                 FrameView(
-                    frameStats = scores.getOrNull(i),
+                    score = scores.getOrNull(i),
                     modifier = Modifier
                         .aspectRatio(1f)
                 )
@@ -326,11 +328,9 @@ fun PlayerFramesView(
 
 @Composable
 fun FrameView(
-    frameStats: FrameScore?,
+    score: FrameScore?,
     modifier: Modifier = Modifier
 ) {
-    val frame = frameStats?.frame
-    val score = frameStats?.score
     
     Column(
         modifier
@@ -343,7 +343,7 @@ fun FrameView(
                 .weight(0.5f)
         ) {
             StretchyText(
-                text = firstRollAsText(frame),
+                text = score?.firstRollAsText() ?: "",
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -352,7 +352,7 @@ fun FrameView(
             )
             
             StretchyText(
-                text = secondRollAsText(frame),
+                text = score?.secondRollAsText() ?: "",
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .weight(0.5f)
@@ -367,7 +367,7 @@ fun FrameView(
                 .weight(0.5f)
         ) {
             StretchyText(
-                text = score?.toString() ?: "",
+                text = score?.total()?.toString() ?: "",
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f)
             )
@@ -375,21 +375,20 @@ fun FrameView(
     }
 }
 
-private fun firstRollAsText(frame: Frame?) = when (frame) {
-    null -> ""
-    is OpenFrame -> frame.firstRoll.toString()
-    is Spare -> frame.firstRoll.toString()
-    is BonusRollForSpare -> frame.firstRoll.toString()
-    Strike, is FirstBonusRollForStrike, is BonusRollsForStrike -> ""
-    is IncompleteFrame -> frame.firstRoll.toString()
-}
+private fun FrameScore?.firstRollAsText(): String =
+    when (val r = this?.firstRoll) {
+        null -> ""
+        PinCount.MAX -> ""
+        else -> r.toString()
+    }
 
-private fun secondRollAsText(frame: Frame?) = when (frame) {
-    null -> ""
-    is Strike, is FirstBonusRollForStrike, is BonusRollsForStrike -> "╳"
-    is Spare, is BonusRollForSpare -> "/"
-    is OpenFrame -> frame.secondRoll.toString()
-    is IncompleteFrame -> ""
+private fun FrameScore.secondRollAsText(): String {
+    return when {
+        firstRoll == PinCount.MAX -> "╳"
+        secondRoll == null -> ""
+        firstRoll + secondRoll == Companion.MAX -> "/"
+        else -> secondRoll.toString()
+    }
 }
 
 @Composable
@@ -413,11 +412,11 @@ private fun StretchyText(
 }
 
 @Composable
-fun RollButtonBar(game: MultiplayerGame, onRoll: (Int) -> Unit, modifier: Modifier = Modifier) {
+fun RollButtonBar(game: MultiplayerGame, onRoll: (PinCount) -> Unit, modifier: Modifier = Modifier) {
     val maxRoll = game.maxNextRoll()
     
     Row(modifier) {
-        (0..pinCount).forEach { i ->
+        (0..PinCount.MAX.score()).map { it.pins }.forEach { i ->
             Button(
                 onClick = { onRoll(i) },
                 modifier = Modifier.padding(start = 2.dp, end = 2.dp),
@@ -429,7 +428,8 @@ fun RollButtonBar(game: MultiplayerGame, onRoll: (Int) -> Unit, modifier: Modifi
     }
 }
 
-fun MultiplayerGame.maxNextRoll(): Int = when(val prevFrame = get(nextPlayerToBowl()).lastOrNull()) {
-    is IncompleteFrame -> pinCount - prevFrame.firstRoll
-    else -> pinCount
-}
+fun MultiplayerGame.maxNextRoll(): PinCount =
+    when (val prevFrame = get(nextPlayerToBowl()).lastOrNull()) {
+        is IncompleteFrame -> PinCount.MAX - prevFrame.firstRoll
+        else -> PinCount.MAX
+    }
