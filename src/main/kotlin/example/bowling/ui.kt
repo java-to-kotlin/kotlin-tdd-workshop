@@ -68,7 +68,7 @@ data class SetUp(
 ) : AppState
 
 data class Playing(
-    val playerNames: PersistentList<String>,
+    val playerNames: List<String>,
     val game: MultiplayerGame = newGame(playerNames.size)
 ) : AppState
 
@@ -163,7 +163,7 @@ private fun StartGameButton(
             enabled = state.playerNames.isNotEmpty(),
             onClick = {
                 update(
-                    Playing(state.playerNames)
+                    Playing(state.playerNames.map { it.trim() })
                 )
             },
             modifier = Modifier
