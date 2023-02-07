@@ -375,9 +375,8 @@ fun FrameView(
     }
 }
 
-private fun FrameScore?.firstRollAsText(): String =
-    when (val r = this?.firstRoll) {
-        null -> ""
+private fun FrameScore.firstRollAsText(): String =
+    when (val r = this.firstRoll) {
         PinCount.MAX -> ""
         else -> r.toString()
     }
