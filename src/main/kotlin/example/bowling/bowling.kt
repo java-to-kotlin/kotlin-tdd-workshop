@@ -1,15 +1,11 @@
 package example.bowling
 
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.plus
-import kotlinx.collections.immutable.toPersistentList
 
 
-typealias MultiplayerGame = PersistentList<Game>
+typealias MultiplayerGame = List<Game>
 
 fun newGame(playerCount: Int): MultiplayerGame =
-    (1..playerCount).map { newGame }.toPersistentList()
+    (1..playerCount).map { newGame }
 
 fun MultiplayerGame.nextPlayerToBowl(): Int =
     (0..lastIndex)
@@ -41,11 +37,11 @@ fun MultiplayerGame.roll(rollPinfall: PinCount): MultiplayerGame {
     return set(p, get(p).roll(rollPinfall))
 }
 
-typealias Game = PersistentList<Frame>
+typealias Game = List<Frame>
 
 val framesPerGame = 10
 
-val newGame = persistentListOf<Frame>()
+val newGame = listOf<Frame>()
 
 
 sealed interface Frame {
@@ -116,7 +112,7 @@ fun Game.roll(rollPinfall: PinCount): Game =
 private fun Game.completeFrame(
     prev: IncompleteFrame,
     secondRoll: PinCount
-): PersistentList<Frame> {
+): List<Frame> {
     val firstRoll = prev.firstRoll
     return set(
         lastIndex,

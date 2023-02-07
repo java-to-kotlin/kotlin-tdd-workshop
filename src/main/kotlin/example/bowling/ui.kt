@@ -56,15 +56,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import example.bowling.PinCount.Companion
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.plus
 
 
 sealed interface AppState
 
 data class SetUp(
-    val playerNames: PersistentList<String> = persistentListOf()
+    val playerNames: List<String> = emptyList()
 ) : AppState
 
 data class Playing(
