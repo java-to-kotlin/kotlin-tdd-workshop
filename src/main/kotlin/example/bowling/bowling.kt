@@ -19,10 +19,21 @@ val Int.pins get(): Pinfall = TODO()
 interface Frame
 
 object UnplayedFrame : Frame {
-    fun roll(pins: Pinfall): Frame = Strike
+    fun roll(pins: Pinfall): Frame =
+        when {
+            pins.value == 10 -> Strike
+            else -> IncompleteFrame()
+        }
 }
 
 object Strike : Frame
+
+class IncompleteFrame() : Frame {
+    fun roll(pins: Pinfall): Frame =
+        OpenFrame()
+}
+
+class OpenFrame : Frame
 
 class Line
 
