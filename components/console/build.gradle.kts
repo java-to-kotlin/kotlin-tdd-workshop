@@ -13,8 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":components:bowling"))
-    implementation(project(":components:ui"))
+    implementation(project(":components:ui-theme"))
     implementation(compose.desktop.currentOs)
     
     testImplementation(kotlin("test"))

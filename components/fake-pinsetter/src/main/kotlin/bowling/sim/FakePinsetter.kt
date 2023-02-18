@@ -13,10 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import bowling.pinCount
 import bowling.ui.AppTheme
 import kotlin.concurrent.thread
 
+val pinCount = 10
 
 data class HardwareState(
     val ready: Boolean,

@@ -26,6 +26,8 @@ import example.bowling.ui.SetupScreen
 import java.io.BufferedReader
 import java.io.BufferedWriter
 
+val framesPerGame = 10
+val pinCount = 10
 
 sealed interface AppMode
 

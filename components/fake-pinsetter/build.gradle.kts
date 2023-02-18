@@ -14,8 +14,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-     implementation(project(":components:bowling"))
-    implementation(project(":components:ui"))
+    implementation(project(":components:ui-theme"))
     implementation(compose.desktop.currentOs)
     
     testImplementation(kotlin("test"))
