@@ -36,3 +36,5 @@ mkpipe "$basedir"/pipes/multiplexer-to-console
   "$basedir"/pipes/controller-to-multiplexer \
   "$basedir"/pipes/multiplexer-to-controller \
   &
+
+wait
