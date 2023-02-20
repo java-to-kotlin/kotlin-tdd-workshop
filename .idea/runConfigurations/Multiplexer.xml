@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Multiplexer" type="JetRunConfigurationType" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="bowling.multiplexer.Multiplexer" />
+    <module name="bowling.components.multiplexer.main" />
+    <option name="PROGRAM_PARAMETERS" value="pipes/console-to-multiplexer pipes/multiplexer-to-console pipes/pinsetter-to-multiplexer pipes/multiplexer-to-pinsetter pipes/controller-to-multiplexer pipes/multiplexer-to-controller" />
+    <shortenClasspath name="NONE" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/workshop" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

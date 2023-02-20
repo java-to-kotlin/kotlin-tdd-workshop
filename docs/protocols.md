@@ -4,16 +4,16 @@
 
 ```plantuml
 @startuml
+
 component Console
-component {
-    component Multiplexer
-    component Controller
-    Multiplexer -- Controller : pipe
-}
+component Multiplexer
 component Pinsetter
 
-Console - Multiplexer : tcp/ip
+Console - Multiplexer : pipe
 Multiplexer - Pinsetter : serial
+
+component Controller
+Multiplexer -- Controller : pipe
 
 @enduml
 ```

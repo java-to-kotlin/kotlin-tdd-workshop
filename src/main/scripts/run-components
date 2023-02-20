@@ -1,0 +1,43 @@
+#!/bin/bash
+set -eio pipefail
+
+basedir="$(realpath -m "$(dirname "$0")")"
+
+function mkpipe() {
+  if [[ ! -p "$1" ]]
+  then
+    mkfifo "$1"
+  fi
+}
+
+mkdir -p "$basedir"/pipes
+mkpipe "$basedir"/pipes/controller-to-multiplexer
+mkpipe "$basedir"/pipes/multiplexer-to-controller
+mkpipe "$basedir"/pipes/multiplexer-to-pinsetter
+mkpipe "$basedir"/pipes/pinsetter-to-multiplexer
+mkpipe "$basedir"/pipes/console-to-multiplexer
+mkpipe "$basedir"/pipes/multiplexer-to-console
+
+"$basedir"/console/bin/console \
+  "$basedir"/pipes/multiplexer-to-console \
+  "$basedir"/pipes/console-to-multiplexer \
+  &
+
+"$basedir"/fake-pinsetter/bin/fake-pinsetter \
+    "$basedir"/pipes/multiplexer-to-pinsetter \
+    "$basedir"/pipes/pinsetter-to-multiplexer \
+    &
+
+"$basedir"/multiplexer/bin/multiplexer \
+  "$basedir"/pipes/console-to-multiplexer \
+  "$basedir"/pipes/multiplexer-to-console \
+  "$basedir"/pipes/pinsetter-to-multiplexer \
+  "$basedir"/pipes/multiplexer-to-pinsetter \
+  "$basedir"/pipes/controller-to-multiplexer \
+  "$basedir"/pipes/multiplexer-to-controller \
+  &
+
+cat <"$basedir"/pipes/multiplexer-to-controller \
+  &
+
+cat >"$basedir"/pipes/controller-to-multiplexer

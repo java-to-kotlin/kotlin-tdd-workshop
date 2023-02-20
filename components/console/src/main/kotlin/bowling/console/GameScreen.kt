@@ -30,13 +30,15 @@ import androidx.compose.ui.unit.sp
 import bowling.ui.StretchyText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.BufferedReader
+import java.io.BufferedWriter
 
 
-private val turnIndicator = "\uD83C\uDFB3" // bowling ball emoji
+private const val turnIndicator = "\uD83C\uDFB3" // bowling ball emoji
 
 
 @Composable
-fun GameScreen(mode: Playing, update: (AppMode) -> Unit) {
+fun GameScreen(mode: Playing, input: BufferedReader, output: BufferedWriter, update: (AppMode) -> Unit) {
     val nextToBowl = when (mode.gameState) {
         null -> null
         is GameInProgressState -> mode.gameState.nextPlayerToBowl
@@ -45,11 +47,7 @@ fun GameScreen(mode: Playing, update: (AppMode) -> Unit) {
     
     LaunchedEffect(mode.playerCount) {
         launch(Dispatchers.IO) {
-            runGame(
-                input = System.`in`.bufferedReader(),
-                output = System.out.bufferedWriter(),
-                playerCount = mode.playerCount
-            ) { newGameState ->
+            runGameIO(input, output, mode.playerCount) { newGameState ->
                 update(mode.copy(gameState = newGameState))
             }
         }

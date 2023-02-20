@@ -1,7 +1,9 @@
-package example.bowling.sim
+@file:JvmName("FakePinsetter")
+package bowling.sim
 
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells.Fixed
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -13,10 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
+import bowling.io.openStreams
 import bowling.ui.AppTheme
 import kotlin.concurrent.thread
 
-val pinCount = 10
+const val pinCount = 10
 
 data class HardwareState(
     val ready: Boolean,
@@ -24,7 +28,9 @@ data class HardwareState(
 )
 
 
-fun main() = application {
+fun main(args: Array<String>) = application {
+    val (input, output) = openStreams(args)
+    
     var state by remember {
         mutableStateOf(
             HardwareState(ready = false, pinsUp = 0)
@@ -32,19 +38,20 @@ fun main() = application {
     }
     
     thread(start = true) {
-        val reader = System.`in`.bufferedReader()
-        reader.lineSequence()
+        input.lineSequence()
             .forEach { command ->
                 when (command) {
                     "RESET" -> {
                         state = HardwareState(ready = true, pinsUp = pinCount)
-                        println("READY")
+                        
+                        output.appendLine("READY")
+                        output.flush()
                     }
                     
                     "SET FULL" -> {
                         state = state.copy(ready = true, pinsUp = pinCount)
                     }
-                    
+                
                     "SET PARTIAL" -> {
                         state = state.copy(ready = true)
                     }
@@ -54,7 +61,8 @@ fun main() = application {
     
     Window(
         title = "Fake Pinsetter",
-        onCloseRequest = ::exitApplication
+        state = rememberWindowState(width = 120.dp),
+        onCloseRequest = ::exitApplication,
     ) {
         AppTheme {
             RollButtons(
@@ -62,7 +70,9 @@ fun main() = application {
                 maxRoll = state.pinsUp,
                 onRoll = { n ->
                     state = state.copy(ready = false, pinsUp = state.pinsUp - n)
-                    println("PINFALL $n")
+                    
+                    output.appendLine("PINFALL $n")
+                    output.flush()
                 }
             )
         }
@@ -76,14 +86,16 @@ fun RollButtons(
     onRoll: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(modifier) {
+    LazyVerticalGrid(columns = Fixed(1), modifier) {
         (0..pinCount).forEach { i ->
-            Button(
-                onClick = { onRoll(i) },
-                modifier = Modifier.padding(start = 2.dp, end = 2.dp),
-                enabled = isEnabled && i <= maxRoll
-            ) {
-                Text("$i")
+            item(i) {
+                Button(
+                    onClick = { onRoll(i) },
+                    modifier = Modifier.padding(start = 2.dp, end = 2.dp),
+                    enabled = isEnabled && i <= maxRoll
+                ) {
+                    Text("$i")
+                }
             }
         }
     }

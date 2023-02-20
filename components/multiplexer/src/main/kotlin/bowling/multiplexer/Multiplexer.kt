@@ -2,104 +2,94 @@
 
 package bowling.multiplexer
 
+import java.io.BufferedReader
+import java.io.BufferedWriter
 import java.io.File
+import java.io.InterruptedIOException
 import java.io.Writer
-import java.util.concurrent.SynchronousQueue
 
 
-fun process(from: () -> String?, to: (String) -> Unit) =
-    Thread {
-        generateSequence { if (Thread.interrupted()) null else from() }
-            .forEach(to)
-    }.apply { start() }
+fun ThreadGroup.process(from: () -> String?, to: (String) -> Unit): Thread {
+    val thread = Thread(this) {
+        try {
+            generateSequence { from() }
+                .onEach { System.err.println("multiplexer routing: $it") }
+                .forEach { line ->
+                    to(line)
+                }
+        } catch (e: InterruptedIOException) {
+            // end thread
+        }
+    }
+    thread.start()
+    return thread
+}
 
 fun route(vararg rs: Pair<Iterable<String>, (String) -> Unit>): (String) -> Unit {
-    val routes = rs.flatMap { route -> route.first.map { s -> s to route.second } }.toMap()
+    val routes = rs
+        .flatMap { route -> route.first.map { s -> s to route.second } }
+        .toMap()
+    
     return fun(line: String) {
         routes[line.substringBefore(" ")]?.invoke(line)
+            ?: System.err.println("unrecognised first token, cannot route: $line")
+        
     }
 }
 
 
 fun main(args: Array<String>) {
-    val consoleIn: File
-    val consoleOut: File
-    val pinsetterIn: File
-    val pinsetterOut: File
-    val controllerIn: File
-    val controllerOut: File
-    
-    when (args.size) {
-        0 -> {
-            val stdin = File("/dev/stdin")
-            val stdout = File("/dev/stdout")
-            
-            consoleIn = stdin
-            consoleOut = stdout
-            pinsetterIn = stdin
-            pinsetterOut = stdout
-            controllerIn = stdin
-            controllerOut = stdout
-        }
-        
-        3 -> {
-            val consoleDevice = File(args[0])
-            val pinsetterDevice = File(args[1])
-            val controllerDevice = File(args[2])
-            consoleIn = consoleDevice
-            consoleOut = consoleDevice
-            pinsetterIn = pinsetterDevice
-            pinsetterOut = pinsetterDevice
-            controllerIn = controllerDevice
-            controllerOut = controllerDevice
-        }
-        
-        6 -> {
-            consoleIn = File(args[0])
-            consoleOut = File(args[1])
-            pinsetterIn = File(args[2])
-            pinsetterOut = File(args[3])
-            controllerIn = File(args[4])
-            controllerOut = File(args[5])
-        }
-        
-        else -> {
-            error("usage error message TBD")
-        }
+    if (args.size != 6) {
+        error("usage error")
     }
     
-    run(
-        consoleIn = consoleIn,
-        consoleOut = consoleOut,
-        pinsetterIn = pinsetterIn,
-        pinsetterOut = pinsetterOut,
-        controllerIn = controllerIn,
-        controllerOut = controllerOut
+    // Open output streams first, then input streams to avoid deadlock.
+    // All other components open input streams first and then output.
+    
+    val consoleWriter = File(args[1]).bufferedWriter()
+    val pinsetterWriter = File(args[3]).bufferedWriter()
+    val controllerWriter = File(args[5]).bufferedWriter()
+    
+    System.err.println("multiplexer opened output streams")
+    
+    val consoleReader = File(args[0]).bufferedReader()
+    val pinsetterReader = File(args[2]).bufferedReader()
+    val controllerReader = File(args[4]).bufferedReader()
+    
+    System.err.println("multiplexer opened input streams")
+    
+    ThreadGroup("pumps").routeMessages(
+        consoleReader,
+        consoleWriter,
+        pinsetterReader,
+        pinsetterWriter,
+        controllerReader,
+        controllerWriter
     )
 }
 
-internal fun run(
-    consoleIn: File,
-    consoleOut: File,
-    pinsetterIn: File,
-    pinsetterOut: File,
-    controllerIn: File,
-    controllerOut: File
+fun ThreadGroup.routeMessages(
+    consoleReader: BufferedReader,
+    consoleWriter: BufferedWriter,
+    pinsetterReader: BufferedReader,
+    pinsetterWriter: BufferedWriter,
+    controllerReader: BufferedReader,
+    controllerWriter: BufferedWriter
 ) {
-    val controllerEvents = SynchronousQueue<String>()
+    val controllerWriteLock = Any()
+    fun writeToController(s: String) {
+        synchronized(controllerWriteLock) {
+            controllerWriter.writeLine(s)
+        }
+    }
     
-    val controllerEventsWriter = controllerOut.bufferedWriter()
-    val pinsetterCommandWriter = pinsetterOut.bufferedWriter()
-    val viewEventsWriter = consoleOut.bufferedWriter()
-    
-    process(from = consoleIn.bufferedReader()::readLine, to = controllerEvents::put)
-    process(from = pinsetterIn.bufferedReader()::readLine, to = controllerEvents::put)
-    process(from = controllerEvents::take, to = controllerEventsWriter::writeLine)
+    process(from = consoleReader::readLine, to = ::writeToController)
+    process(from = pinsetterReader::readLine, to = ::writeToController)
     process(
-        from = controllerIn.bufferedReader()::readLine,
+        from = controllerReader::readLine,
         to = route(
-            setOf("SET") to pinsetterCommandWriter::writeLine,
-            setOf("PLAYER", "NEXT", "WINNER") to viewEventsWriter::writeLine
+            setOf("RESET", "SET") to pinsetterWriter::writeLine,
+            setOf("PLAYER", "NEXT", "WINNER") to consoleWriter::writeLine
         )
     )
 }

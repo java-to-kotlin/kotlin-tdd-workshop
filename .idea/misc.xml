@@ -4,8 +4,9 @@
     <option name="emacsPath" value="/usr/bin/emacs" />
   </component>
   <component name="EntryPointsManager">
-    <list size="1">
-      <item index="0" class="java.lang.String" itemvalue="io.kotest.core.spec.style.AnnotationSpec.Test" />
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="io.kotest.core.spec.style.AnnotationSpec.After" />
+      <item index="1" class="java.lang.String" itemvalue="io.kotest.core.spec.style.AnnotationSpec.Test" />
     </list>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />

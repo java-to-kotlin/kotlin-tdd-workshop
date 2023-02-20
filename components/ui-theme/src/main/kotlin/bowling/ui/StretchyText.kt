@@ -12,8 +12,8 @@ import androidx.compose.ui.unit.min
 @Composable
 fun StretchyText(
     text: String,
-    textAlign: TextAlign,
-    modifier: Modifier
+    textAlign: TextAlign = TextAlign.Center,
+    modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(
         modifier = modifier

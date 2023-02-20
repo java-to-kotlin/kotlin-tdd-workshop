@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="FakePinsetter" type="JetRunConfigurationType" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="bowling.sim.FakePinsetter" />
+    <module name="bowling.components.fake-pinsetter.main" />
+    <option name="PROGRAM_PARAMETERS" value="pipes/multiplexer-to-pinsetter pipes/pinsetter-to-multiplexer" />
+    <shortenClasspath name="NONE" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/workshop" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

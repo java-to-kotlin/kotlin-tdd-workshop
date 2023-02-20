@@ -20,14 +20,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import bowling.io.openStreams
 import bowling.ui.AppTheme
 import bowling.ui.bowlorama
 import example.bowling.ui.SetupScreen
 import java.io.BufferedReader
 import java.io.BufferedWriter
 
-val framesPerGame = 10
-val pinCount = 10
+const val framesPerGame = 10
+const val pinCount = 10
 
 sealed interface AppMode
 
@@ -42,7 +43,9 @@ data class Playing(
 
 val Playing.playerCount get() = playerNames.size
 
-fun main() = application {
+fun main(args: Array<String>) = application {
+    val (input, output) = openStreams(args)
+    
     val stateRef: MutableState<AppMode> = remember {
         mutableStateOf(
             SetUp()
@@ -74,7 +77,7 @@ fun main() = application {
                 Box(modifier = Modifier.padding(16.dp)) {
                     when (val state = stateRef.value) {
                         is SetUp -> SetupScreen(state, updateState)
-                        is Playing -> GameScreen(state, updateState)
+                        is Playing -> GameScreen(state, input, output, updateState)
                     }
                 }
             }
@@ -82,7 +85,7 @@ fun main() = application {
     }
 }
 
-fun runGame(input: BufferedReader, output: BufferedWriter, playerCount: Int, setState: (GameViewState)-> Unit) {
+fun runGameIO(input: BufferedReader, output: BufferedWriter, playerCount: Int, setState: (GameViewState) -> Unit) {
     output.write("START $playerCount\n")
     output.flush()
     do {
