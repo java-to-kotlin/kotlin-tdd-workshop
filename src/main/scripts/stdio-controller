@@ -1,0 +1,9 @@
+#!/bin/bash
+set -eio pipefail
+
+basedir="$(realpath -m "$(dirname "$0")")"
+
+cat <"$basedir"/pipes/multiplexer-to-controller \
+  &
+
+cat >"$basedir"/pipes/controller-to-multiplexer
