@@ -1,9 +1,12 @@
 @file:JvmName("FakePinsetter")
+
 package bowling.sim
 
+import androidx.compose.foundation.layout.IntrinsicSize.Min
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells.Fixed
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -11,7 +14,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -51,7 +57,7 @@ fun main(args: Array<String>) = application {
                     "SET FULL" -> {
                         state = state.copy(ready = true, pinsUp = pinCount)
                     }
-                
+                    
                     "SET PARTIAL" -> {
                         state = state.copy(ready = true)
                     }
@@ -61,7 +67,7 @@ fun main(args: Array<String>) = application {
     
     Window(
         title = "Fake Pinsetter",
-        state = rememberWindowState(width = 120.dp),
+        state = rememberWindowState(size = DpSize.Unspecified),
         onCloseRequest = ::exitApplication,
     ) {
         AppTheme {
@@ -73,7 +79,11 @@ fun main(args: Array<String>) = application {
                     
                     output.appendLine("PINFALL $n")
                     output.flush()
-                }
+                },
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .wrapContentSize()
+                    .width(Dp.Unspecified)
             )
         }
     }
@@ -86,16 +96,18 @@ fun RollButtons(
     onRoll: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyVerticalGrid(columns = Fixed(1), modifier) {
+    Row(modifier) {
         (0..pinCount).forEach { i ->
-            item(i) {
-                Button(
-                    onClick = { onRoll(i) },
-                    modifier = Modifier.padding(start = 2.dp, end = 2.dp),
-                    enabled = isEnabled && i <= maxRoll
-                ) {
-                    Text("$i")
-                }
+            Button(
+                onClick = { onRoll(i) },
+                enabled = isEnabled && i <= maxRoll,
+                modifier = Modifier
+                    .wrapContentSize()
+                    .width(Min)
+                    .align(CenterVertically)
+                    .padding(4.dp)
+            ) {
+                Text("$i")
             }
         }
     }
