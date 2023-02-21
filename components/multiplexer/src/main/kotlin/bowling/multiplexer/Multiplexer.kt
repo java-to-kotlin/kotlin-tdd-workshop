@@ -47,16 +47,16 @@ fun main(args: Array<String>) {
     // All other components open input streams first and then output.
     
     val consoleWriter = File(args[1]).bufferedWriter()
-    val pinsetterWriter = File(args[3]).bufferedWriter()
-    val controllerWriter = File(args[5]).bufferedWriter()
-    
-    System.err.println("multiplexer opened output streams")
-    
     val consoleReader = File(args[0]).bufferedReader()
-    val pinsetterReader = File(args[2]).bufferedReader()
-    val controllerReader = File(args[4]).bufferedReader()
+    System.err.println("multiplexer opened console streams")
     
-    System.err.println("multiplexer opened input streams")
+    val pinsetterWriter = File(args[3]).bufferedWriter()
+    val pinsetterReader = File(args[2]).bufferedReader()
+    System.err.println("multiplexer opened pinsetter streams")
+    
+    val controllerWriter = File(args[5]).bufferedWriter()
+    val controllerReader = File(args[4]).bufferedReader()
+    System.err.println("multiplexer opened controller streams")
     
     ThreadGroup("pumps").routeMessages(
         consoleReader,
