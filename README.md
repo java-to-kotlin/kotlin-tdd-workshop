@@ -1,12 +1,10 @@
+## Bowling workshop
 
+## How to fake serial comms with fake hardware
 
-How to fake serial comms with fake hardware using TCP/IP
+1. Run the `workshop` Gradle task to compile the components and install the components and scripts in the workshop/ directory.
+2. Before the workshop, switch to the mobbing branch in which participants write code to implement the controller
+3. Run `./workshop/run-components` to start the console, fake-pinsetter and multiplexer
+4. The controller must read from the file `workshop/pipes/multiplexer-to-controller` and write to `workshop/pipes/controller-to-multiplexer`. 
 
-1. Run the fake hardware on port 3000 (for example).
-2. Run Gradle task installDist to build the control app
-3. Run: `3<>/dev/tcp/localhost/3000 ./build/install/bowling/bin/bowling $NUMBER_OF_PLAYERS` 
-
-
-To fake the hardware with netcat, run: `nc -lk 3000`.  Hardware commands will be written to the terminal, and you can enter hardware events in the terminal. 
-
-When you run the app, you will see the command "RESET". Respond by typing "READY".  Then type "PINFALL $N"  (e.g. "PINFALL 1" for one pin down, "PINFALL 10" for a strike, etc.).  You will then see a hardware command "SET PARTIAL" or "SET FULL".  Respond with another PINFALL event.
+After running `./workshop/run-components` you can run `./workshop/stdio-controller` in another terminal to manually demo the behaviour of the controller. Lines sent to the controller will be displayed on the terminal, and you can enter commands to the pinsetter and console to drive the game logic.
