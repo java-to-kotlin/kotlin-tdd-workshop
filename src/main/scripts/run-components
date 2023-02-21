@@ -18,6 +18,8 @@ mkpipe "$basedir"/pipes/pinsetter-to-multiplexer
 mkpipe "$basedir"/pipes/console-to-multiplexer
 mkpipe "$basedir"/pipes/multiplexer-to-console
 
+trap 'kill 0' EXIT
+
 "$basedir"/console/bin/console \
   "$basedir"/pipes/multiplexer-to-console \
   "$basedir"/pipes/console-to-multiplexer \
