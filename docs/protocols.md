@@ -5,55 +5,51 @@
 Deployment for testing the Controller locally
 
 ```plantuml
-@startuml
-component {
-    component Console
-    component Multiplexer
-    component FakePinsetter
+node MacBook {
+    component {
+        
+        component Console
+        component Multiplexer
+        component FakePinsetter
+        
+        Console - Multiplexer : pipe
+        Multiplexer - FakePinsetter : pipe
+    }
     
-    Console - Multiplexer : pipe
-    Multiplexer - FakePinsetter : pipe
+    component Controller
+    Controller -- Multiplexer : pipe
 }
 
-component Controller
-Controller -- Multiplexer : pipe
-@enduml
+actor You
+You -u- Console
+You -u- FakePinsetter
 ```
 
 
 Deployment in the field
 
 ```plantuml
-@startuml
-
-actor Player
-
 node Pinsetter {
     component Firmware
 }
 
 node LaneUnit {
-    component NetcatServer
     component Controller
     component Multiplexer
-}
-
-node ConsoleUnit { 
     component Console
 }
 
-Player -d- Console
-Console -r- NetcatServer : "tcp/ip"
-NetcatServer -r- Multiplexer : pipe
+Console -r- Multiplexer : pipe
 Controller -d- Multiplexer : pipe
 Multiplexer -r- Firmware : serial
 
-@enduml
+actor  Bowler
+Bowler -u- Console
 ```
 
 ## Sequence diagram of message flows
 
-Messages between the Controller and the Multiplexer
+Messages to/from the Controller
 
 ```plantuml
 @startuml
