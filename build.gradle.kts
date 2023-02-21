@@ -30,3 +30,9 @@ tasks.register("workshop") {
     }
     dependsOn(gatherScripts)
 }
+
+defaultTasks(
+    "clean",
+    "test",
+    "workshop"
+)

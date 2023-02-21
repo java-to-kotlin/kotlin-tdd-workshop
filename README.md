@@ -2,7 +2,7 @@
 
 ## How to fake serial comms with fake hardware
 
-1. Run `./gradlew clean test workshop` to compile the components and install the components and scripts in the `workshop/` directory.
+1. Run `./gradlew` to compile the components and install the components and scripts in the `workshop/` directory.
 2. Before the workshop, switch to the mobbing branch in which participants write code to implement the controller
 3. Run `./workshop/run-components` to start the console, fake-pinsetter and multiplexer
 4. The controller must read from the file `workshop/pipes/multiplexer-to-controller` and write to `workshop/pipes/controller-to-multiplexer`. 
