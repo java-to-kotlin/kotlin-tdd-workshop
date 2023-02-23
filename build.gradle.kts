@@ -24,11 +24,18 @@ val gatherScripts = tasks.register<Copy>("gather-scripts") {
     include("**")
 }
 
+val gatherDocs = tasks.register<Copy>("gather-docs") {
+    from(projectDir)
+    into(workshopDir)
+    include("docs/**")
+}
+
 tasks.register("workshop") {
     runnableComponents.forEach { c ->
         dependsOn("gather-$c")
     }
     dependsOn(gatherScripts)
+    dependsOn(gatherDocs)
 }
 
 defaultTasks(
