@@ -4,7 +4,7 @@
 
 A set of software components run the games for a single bowling lane.
 
-* The _Pinsetter_ controls the lane's pinsetter – a machine that automatically sets bowling pins back in their original positions, returns bowling balls to the front of the alley, and clears fallen pins on the pin deck.  The Pinsetter firmware communicates over serial cable with a text-based protocol.
+* The _Pinsetter_ controls the lane's pinsetter – a machine that automatically sets bowling pins back in their original positions, returns bowling balls to the front of the alley, and clears fallen pins from the pin deck.  The Pinsetter firmware communicates over serial cable with a text-based protocol.
 * The _Console_ is a graphical user interface with which the players' enter their names, start the game, and see the current scoreboard and next player to bowl.
 * The _Controller_ runs the game logic.  It keeps track of the players' turns and their scores.  It controls the _Pinsetter_ and updates the _Console_ as the game progresses.  It has a single input and output stream, and relies on the _Multiplexer_ to route messages to/from the other components.
 * The _Multiplexer_ routes messages between the _Controller_, _Console_ and _Pinsetter_.
@@ -136,11 +136,25 @@ end
 
 ```
 Inputs = 
-    "PLAYER" space frame_score* score
+    "PLAYER" space score_line
   | "NEXT" space player_index
   | "WINNER" space player_index_list
 
 Outputs = "START" space player_count
+
+score_line = frame_scores? score
+
+frame_scores = frame_score | frame_score space frame_scores
+
+frame_score = rolls "," score?
+
+rolls = numeric_rolls | symbolic_spare | symbolic_strike
+
+numeric_rolls = score? "," score?
+
+symbolic_spare = score "," "/"
+
+symbolic_strike = "X" "," | "," "X"
 
 player_count = /[1-9][0-9]*/
 
@@ -159,8 +173,8 @@ The Controller performs the Peer side of both the Pinsetter and Console protocol
 
 ```plantuml
 @startuml
-participant Multiplexer
 participant Controller
+participant Multiplexer
 
 Multiplexer -> Controller : START <player-count>
 
