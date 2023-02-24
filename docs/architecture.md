@@ -2,31 +2,12 @@
 
 ## Components
 
-Deployment for testing the Controller locally
+A set of software components run the games for a single bowling lane.
 
-```plantuml
-node MacBook {
-    component {
-        
-        component Console
-        component Multiplexer
-        component FakePinsetter
-        
-        Console - Multiplexer : pipe
-        Multiplexer - FakePinsetter : pipe
-    }
-    
-    component Controller
-    Controller -- Multiplexer : pipe
-}
-
-actor You
-You -u- Console
-You -u- FakePinsetter
-```
-
-
-Deployment in the field
+* The _Pinsetter_ controls the lane's pinsetter – a machine that automatically sets bowling pins back in their original positions, returns bowling balls to the front of the alley, and clears fallen pins on the pin deck.  The Pinsetter firmware communicates over serial cable with a text-based protocol.
+* The _Console_ is a graphical user interface with which the players' enter their names, start the game, and see the current scoreboard and next player to bowl.
+* The _Controller_ runs the game logic.  It keeps track of the players' turns and their scores.  It controls the _Pinsetter_ and updates the _Console_ as the game progresses.  It has a single input and output stream, and relies on the _Multiplexer_ to route messages to/from the other components.
+* The _Multiplexer_ routes messages between the _Controller_, _Console_ and _Pinsetter_.
 
 ```plantuml
 node Pinsetter {
@@ -47,11 +28,37 @@ actor  Bowler
 Bowler -u- Console
 ```
 
-## Sequence diagram of message flows
+In this workshop we are going to write the _Controller_.
+
+## Deployment for testing the Controller locally during development.  
+
+We simulate the Pinsetter in software on the developer machine and communicate with the fake pinsetter over Unix pipes.
+
+```plantuml
+node MacBook {
+    component {
+        component Console
+        component Multiplexer
+        component FakePinsetter
+        
+        Console - Multiplexer : pipe
+        Multiplexer - FakePinsetter : pipe
+    }
+    
+    component Controller
+    Controller -- Multiplexer : pipe
+}
+
+actor You
+You -u- Console
+You -u- FakePinsetter
+```
+
+
+## Message flows
 
 ### Pinsetter protocol
 
-The Pinsetter controls the pinsetter hardware for the bowling lane.  The Pinsetter firmware communicates by a text-based protocol over serial cable.  For development, we simulate it in software and communicate with the simulation over Unix pipes.
 
 ```plantuml
 participant Peer
@@ -80,13 +87,28 @@ loop
 end
 ```
 
+#### ABNF Grammar
+
+```
+Inputs = 
+     "RESET"
+  | "SET space "PARTIAL"
+  | "SET" space "FULL"
+
+Outputs = 
+    "READY"
+  | "PINFALL" pin_count
+
+pin_count = /[1-9][0-9]*/
+
+space = " "
+```
+
 ### Console protocol
 
-The console is responsible for starting the game and displaying its progress.
-
 ```plantuml
-participant Peer
 participant Console
+participant Peer
 
 Console -> Peer : START <player-count>
 note right : When the user has entered the player names\nand started a new game
@@ -108,12 +130,32 @@ loop until end of game
          note right : Report that the game is over and identify the winner(s)\nThere can be more than one in the case of a draw
     end
 end
+```
 
+#### ABNF Grammar
+
+```
+Inputs = 
+    "PLAYER" space frame_score* score
+  | "NEXT" space player_index
+  | "WINNER" space player_index_list
+
+Outputs = "START" space player_count
+
+player_count = /[1-9][0-9]*/
+
+player_index_list = player_index | player_index space player_index_list
+
+player_index = /[0-9]+/
+
+score = /[0-9]+/
+
+space = " "
 ```
 
 ### Messages to/from the Controller
 
-The controller performs the Peer side of the Pinsetter and Console protocols and relies on the Multiplexer to direct messages to/from the other components.
+The Controller performs the Peer side of both the Pinsetter and Console protocols and relies on the Multiplexer to route messages to/from the other components.
 
 ```plantuml
 @startuml
