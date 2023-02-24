@@ -51,7 +51,7 @@ fun BufferedReader.readViewState(): GameViewState? {
                         frames = parts
                             .drop(1)
                             .dropLast(1)
-                            .map { it.toFrameScore() },
+                            .map { it.toFrameScore() ?: return null },
                         total = parts.lastOrNull()?.toIntOrNull() ?: return null
                     )
                 )
@@ -77,11 +77,38 @@ fun BufferedReader.readViewState(): GameViewState? {
     }
 }
 
-private fun String.toFrameScore(): FrameScore {
-    val scoreParts = split(",").map { it.toIntOrNull() }
-    return FrameScore(
-        firstRoll = scoreParts.getOrNull(0),
-        secondRoll = scoreParts.getOrNull(1),
-        runningTotal = scoreParts.getOrNull(2)
-    )
+internal fun String.toFrameScore(): FrameScore? {
+    val parts = split(",")
+    if (parts.size != 3) return null
+    
+    val runningTotal = parts[2].toIntOrNull()
+    
+    when {
+        parts[1] == "/" -> {
+            val firstRoll = parts[0].toIntOrNull()
+            val secondRoll = if (firstRoll == null) null else pinCount - firstRoll
+            
+            return FrameScore(
+                firstRoll = firstRoll,
+                secondRoll = secondRoll,
+                runningTotal = runningTotal
+            )
+        }
+        
+        parts[0] == "X" && parts[1] == "" || parts[0] == "" && parts[1] == "X" -> {
+            return FrameScore(
+                firstRoll = 10,
+                secondRoll = null,
+                runningTotal = runningTotal
+            )
+        }
+        
+        else -> {
+            return FrameScore(
+                firstRoll = parts[0].toIntOrNull(),
+                secondRoll = parts[1].toIntOrNull(),
+                runningTotal = runningTotal
+            )
+        }
+    }
 }
