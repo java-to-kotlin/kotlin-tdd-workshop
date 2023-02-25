@@ -53,7 +53,7 @@ fun controller(input: BufferedReader, output: BufferedWriter) {
     
     while (true) {
         val inputLine = input.readLine() ?: break // end of stream
-        val event = inputLine.toEvent() ?: continue // failed to parse, try next one
+        val event = inputLine.toControllerInput() ?: continue // failed to parse, try next one
         
         val effect = game.eval(event)
         game = effect.newState
@@ -96,12 +96,13 @@ private fun Lane.eval(inputMessage: ControllerInput): CommandOutcome = when (inp
     is Pinfall -> CommandOutcome(this)
 }
 
-private fun String.toEvent(): ControllerInput? {
-    val type = substringBefore(' ')
+internal fun String.toControllerInput(): ControllerInput? {
+    val parts = split(' ')
+    val type = parts.getOrNull(0)
     return when (type) {
-        "START" -> StartGame(2)
+        "START" -> StartGame(parts[1].toInt())
         "READY" -> PinsetterReady
-        "PINFALL" -> Pinfall(2)
+        "PINFALL" -> Pinfall(parts[1].toInt())
         else -> null.also {
             System.err.println("unrecognised event: $this")
         }

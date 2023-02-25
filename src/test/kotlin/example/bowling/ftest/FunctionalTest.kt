@@ -62,8 +62,7 @@ infix fun ControllerController.`⟵`(data: String) : ControllerController = appl
 }
 
 infix fun ControllerController.`⟶`(expectedData: String): ControllerController = apply {
-    val line = fromController.readLine()
-    assertTrue(line == expectedData)
+    assertTrue(fromController.readLine() == expectedData)
 }
 
 
@@ -71,7 +70,7 @@ class FunctionalTest {
     val theController: ControllerController = runController()
     
     @Test
-//    @Timeout(1, unit = SECONDS)
+    @Timeout(1, unit = SECONDS)
     fun `start of game, one open frame`() {
            theController `⟵` "START 2"
            theController `⟶` "RESET"
