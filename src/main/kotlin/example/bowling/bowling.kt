@@ -10,8 +10,8 @@ fun main(args: Array<String>) =
 
 sealed interface Lane
 object BetweenGames : Lane
-data class ResettingPinsetter(val playerCount: Int): Lane
-data class GameInProgress(val playerGames: List<Frame>): Lane
+data class ResettingPinsetter(val playerCount: Int) : Lane
+data class GameInProgress(val playerGames: List<Frame>) : Lane
 
 
 sealed interface Frame
@@ -29,21 +29,22 @@ object SetFull : PinsetterCommand
 object SetPartial : PinsetterCommand
 
 data class ViewState(
-    val playerScores : List<PlayerScores>,
+    val playerScores: List<PlayerScores>,
     val nextPlayerToBowl: Int
 )
 
 data class PlayerScores(
-    val frames : List<FrameScore>,
+    val frames: List<FrameScore>,
     val total: Int
 )
+
 data class FrameScore(
     val roll1: Int?,
     val roll2: Int?,
     val runningTotal: Int
 )
 
-data class CommandOutcome(
+data class Step(
     val newState: Lane,
     val command: PinsetterCommand? = null
 )
@@ -67,34 +68,57 @@ fun controller(input: BufferedReader, output: BufferedWriter) {
 private fun ViewState.toLines(): List<String> =
     playerScores.map { "PLAYER 0" } + "NEXT $nextPlayerToBowl"
 
-fun Frame.score() : PlayerScores =
+fun Frame.score(): PlayerScores =
     PlayerScores(frames = emptyList(), total = 0)
 
-private fun Lane.toViewState(): ViewState? = when(this) {
+private fun Lane.toViewState(): ViewState? = when (this) {
     BetweenGames -> null
     is ResettingPinsetter -> null
     is GameInProgress -> ViewState(playerScores = playerGames.map { it.score() }, 0)
 }
 
-private fun PinsetterCommand.toLine(): String  = when(this) {
+private fun PinsetterCommand.toLine(): String = when (this) {
     Reset -> "RESET"
     SetFull -> "SET FULL"
     SetPartial -> "SET PARTIAL"
 }
 
 
-private fun Lane.eval(inputMessage: ControllerInput): CommandOutcome = when (inputMessage) {
+private fun Lane.eval(inputMessage: ControllerInput): Step = when (inputMessage) {
     is StartGame ->
-        CommandOutcome(ResettingPinsetter(inputMessage.playerCount), Reset)
+        Step(newState = ResettingPinsetter(playerCount = inputMessage.playerCount), command = Reset)
     
     PinsetterReady -> when (this) {
         is ResettingPinsetter ->
-            CommandOutcome(GameInProgress(playerGames = (1..playerCount).map { UnplayedFrame }))
-        else -> CommandOutcome(this)
+            Step(newState = GameInProgress(playerGames = (1..playerCount).map { UnplayedFrame }))
+        
+        else -> ignoreInput()
     }
     
-    is Pinfall -> CommandOutcome(this)
+    is Pinfall ->
+        when (this) {
+            BetweenGames -> ignoreInput()
+            is ResettingPinsetter -> ignoreInput()
+            is GameInProgress ->
+                Step(
+                    newState = copy(playerGames = playerGames.set(0, playerGames.get(0).roll(inputMessage.pinfall))),
+                    command = SetPartial
+                )
+        }
 }
+
+private fun Frame.roll(pinfall: Int): Frame {
+    return when(this) {
+        UnplayedFrame -> this
+    }
+}
+
+private fun <E> List<E>.set(i: Int, e: E): List<E> =
+    toMutableList().apply { set(i, e) }
+
+fun Lane.ignoreInput() =
+    Step(this)
+
 
 internal fun String.toControllerInput(): ControllerInput? {
     val parts = split(' ')
