@@ -18,6 +18,7 @@ object UnplayedFrame : Frame
 sealed interface Event
 data class StartGame(val playerCount: Int) : Event
 object PinsetterReady : Event
+data class Pinfall(val pinfall: Int)
 
 
 sealed interface Command
@@ -25,11 +26,24 @@ sealed interface PinsetterCommand : Command
 object Reset : PinsetterCommand
 object SetFull : PinsetterCommand
 object SetPartial : PinsetterCommand
-sealed interface ConsoleCommand : Command
+
+data class ViewState(
+    val playerScores : List<PlayerScores>
+)
+
+data class PlayerScores(
+    val frames : List<FrameScore>,
+    val total: Int
+)
+data class FrameScore(
+    val roll1: Int?,
+    val roll2: Int?,
+    val runningTotal: Int
+)
 
 data class CommandOutcome(
     val newState: Game,
-    val events: List<Command>
+    val command: PinsetterCommand? = null
 )
 
 fun controller(input: BufferedReader, output: BufferedWriter) {
@@ -41,11 +55,28 @@ fun controller(input: BufferedReader, output: BufferedWriter) {
         
         val effect = game.eval(event)
         game = effect.newState
-        effect.events
-            .flatMap { command -> command.toLines() }
-            .forEach { outputLine -> output.appendLine(outputLine) }
+        
+        effect.command?.toLine().let(output::appendLine)
+        game.toViewState()?.toLines()?.forEach(output::appendLine)
         output.flush()
     }
+}
+
+private fun ViewState?.toLines(): List<String> =
+    emptyList()
+
+fun Frame.score() : PlayerScores =
+    PlayerScores(frames = emptyList(), total = 0)
+
+private fun Game.toViewState(): ViewState? = when(this) {
+    Starting -> null
+    is GameInProgress -> ViewState(playerScores = this.perPlayer.map { it.score() })
+}
+
+private fun PinsetterCommand.toLine(): String  = when(this) {
+    Reset -> "RESET"
+    SetFull -> "SET FULL"
+    SetPartial -> "SET PARTIAL"
 }
 
 private fun Command.toLines(): List<String> = when (this) {
@@ -56,9 +87,9 @@ private fun Command.toLines(): List<String> = when (this) {
 
 private fun Game.eval(inputMessage: Event): CommandOutcome = when (inputMessage) {
     is StartGame ->
-        CommandOutcome(newGame(inputMessage.playerCount), listOf(Reset))
+        CommandOutcome(newGame(inputMessage.playerCount), Reset)
     
-    PinsetterReady -> CommandOutcome(this, listOf())
+    PinsetterReady -> CommandOutcome(this)
 }
 
 private fun newGame(playerCount: Int) =
