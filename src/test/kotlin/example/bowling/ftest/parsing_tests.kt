@@ -5,18 +5,34 @@ import example.bowling.PinsetterReady
 import example.bowling.StartGame
 import example.bowling.toControllerInput
 import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.property.assume
 import kotlin.test.assertTrue
 
 class StringToControllerInputTest : AnnotationSpec() {
+    companion object {
+        val examples = listOf(
+            "START 2" to StartGame(playerCount = 2),
+            "START 3" to StartGame(playerCount = 3),
+            "READY" to PinsetterReady,
+            "PINFALL 0" to Pinfall(0),
+            "PINFALL 1" to Pinfall(1),
+            "PINFALL 4" to Pinfall(4),
+            "PINFALL 9" to Pinfall(9),
+            "PINFALL 10" to Pinfall(10)
+        )
+    }
+    
+    
     @Test
     fun `valid values`() {
-        assertTrue("START 2".toControllerInput() == StartGame(playerCount = 2))
-        assertTrue("START 3".toControllerInput() == StartGame(playerCount = 3))
-        assertTrue("READY".toControllerInput() == PinsetterReady)
-        assertTrue("PINFALL 0".toControllerInput() == Pinfall(0))
-        assertTrue("PINFALL 1".toControllerInput() == Pinfall(1))
-        assertTrue("PINFALL 4".toControllerInput() == Pinfall(4))
-        assertTrue("PINFALL 9".toControllerInput() == Pinfall(9))
-        assertTrue("PINFALL 10".toControllerInput() == Pinfall(10))
+        examples.forEach { (line, expected )->
+            assertTrue(line.toControllerInput() == expected)
+        }
+    }
+    
+    @Test
+    @Ignore
+    fun `TODO does not throw on invalid input`() {
+        assume(false)
     }
 }
