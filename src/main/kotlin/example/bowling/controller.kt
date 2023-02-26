@@ -7,50 +7,8 @@ import java.io.File
 fun main(args: Array<String>) =
     controller(File(args[0]).bufferedReader(), File(args[1]).bufferedWriter())
 
-
-sealed interface Lane
-object BetweenGames : Lane
-data class ResettingPinsetter(val playerCount: Int) : Lane
-data class GameInProgress(val playerGames: List<Frame>) : Lane
-
-
-sealed interface Frame
-object UnplayedFrame : Frame
-
-sealed interface ControllerInput
-data class StartGame(val playerCount: Int) : ControllerInput
-object PinsetterReady : ControllerInput
-data class Pinfall(val pinfall: Int) : ControllerInput
-
-
-sealed interface PinsetterCommand
-object Reset : PinsetterCommand
-object SetFull : PinsetterCommand
-object SetPartial : PinsetterCommand
-
-data class ViewState(
-    val playerScores: List<PlayerScores>,
-    val nextPlayerToBowl: Int
-)
-
-data class PlayerScores(
-    val frames: List<FrameScore>,
-    val total: Int
-)
-
-data class FrameScore(
-    val roll1: Int?,
-    val roll2: Int?,
-    val runningTotal: Int
-)
-
-data class Step(
-    val newState: Lane,
-    val command: PinsetterCommand? = null
-)
-
 fun controller(input: BufferedReader, output: BufferedWriter) {
-    var game: Lane = BetweenGames
+    var game: LaneState = BetweenGames
     
     while (true) {
         val inputLine = input.readLine() ?: break // end of stream
@@ -65,26 +23,34 @@ fun controller(input: BufferedReader, output: BufferedWriter) {
     }
 }
 
-private fun ViewState.toLines(): List<String> =
-    playerScores.map { "PLAYER 0" } + "NEXT $nextPlayerToBowl"
 
-fun Frame.score(): PlayerScores =
-    PlayerScores(frames = emptyList(), total = 0)
+sealed interface LaneState
+object BetweenGames : LaneState
+data class ResettingPinsetter(val playerCount: Int) : LaneState
+data class GameInProgress(val playerGames: List<Frame>) : LaneState
 
-private fun Lane.toViewState(): ViewState? = when (this) {
+
+
+private fun LaneState.toViewState(): ViewState? = when (this) {
     BetweenGames -> null
     is ResettingPinsetter -> null
-    is GameInProgress -> ViewState(playerScores = playerGames.map { it.score() }, 0)
+    is GameInProgress -> toViewState()
 }
 
-private fun PinsetterCommand.toLine(): String = when (this) {
-    Reset -> "RESET"
-    SetFull -> "SET FULL"
-    SetPartial -> "SET PARTIAL"
-}
+private fun GameInProgress.toViewState() =
+    ViewState(
+        playerScores = playerGames.map { it.score() },
+        nextPlayerToBowl = 0
+    )
 
 
-private fun Lane.eval(inputMessage: ControllerInput): Step = when (inputMessage) {
+data class Step(
+    val newState: LaneState,
+    val command: PinsetterCommand? = null
+)
+
+
+private fun LaneState.eval(inputMessage: ControllerInput): Step = when (inputMessage) {
     is StartGame ->
         Step(newState = ResettingPinsetter(playerCount = inputMessage.playerCount), command = Reset)
     
@@ -107,18 +73,19 @@ private fun Lane.eval(inputMessage: ControllerInput): Step = when (inputMessage)
         }
 }
 
-private fun Frame.roll(pinfall: Int): Frame {
-    return when(this) {
-        UnplayedFrame -> this
-    }
-}
+
+fun LaneState.ignoreInput() =
+    Step(this)
+
 
 private fun <E> List<E>.set(i: Int, e: E): List<E> =
     toMutableList().apply { set(i, e) }
 
-fun Lane.ignoreInput() =
-    Step(this)
 
+sealed interface ControllerInput
+data class StartGame(val playerCount: Int) : ControllerInput
+object PinsetterReady : ControllerInput
+data class Pinfall(val pinfall: Int) : ControllerInput
 
 internal fun String.toControllerInput(): ControllerInput? {
     val parts = split(' ')
@@ -132,3 +99,4 @@ internal fun String.toControllerInput(): ControllerInput? {
         }
     }
 }
+
