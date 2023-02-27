@@ -78,6 +78,7 @@ class FunctionalTest {
         theController `⟶` "PLAYER 0"
         theController `⟶` "PLAYER 0"
         theController `⟶` "NEXT 0"
+        
         theController `⟵` "PINFALL 2"
         theController `⟶` "SET PARTIAL"
         theController `⟶` "PLAYER 2,,2 2"
@@ -92,6 +93,22 @@ class FunctionalTest {
         theController `⟶` "SET FULL"
         theController `⟶` "PLAYER 2,5,7 7"
         theController `⟶` "PLAYER 10,,10 10"
+        theController `⟶` "NEXT 0"
+        
+        theController `⟵` "PINFALL 10"
+        theController `⟶` "SET FULL"
+        theController `⟶` "PLAYER 2,5,7 10,,17 17"
+        theController `⟶` "PLAYER 10,,10 10"
+        theController `⟶` "NEXT 1"
+        theController `⟵` "PINFALL 5"
+        theController `⟶` "SET PARTIAL"
+        theController `⟶` "PLAYER 2,5,7 10,,17 17"
+        theController `⟶` "PLAYER 10,,15 5,,20 20"
+        theController `⟶` "NEXT 1"
+        theController `⟵` "PINFALL 2"
+        theController `⟶` "SET FULL"
+        theController `⟶` "PLAYER 2,5,7 10,,17 17"
+        theController `⟶` "PLAYER 10,,17 5,2,24 24"
         theController `⟶` "NEXT 0"
     }
     
