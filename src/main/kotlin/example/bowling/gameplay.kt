@@ -13,7 +13,9 @@ object StartOfGame : PrecedingFrame {
 
 data class PartialFrame(override val prev: PrecedingFrame, val roll1: Int) : FollowingFrame
 data class OpenFrame(override val prev: PrecedingFrame, val roll1: Int, val roll2: Int) : CompleteFrame
-data class Spare(override val prev: PrecedingFrame, val roll1: Int) : CompleteFrame
+data class Spare(override val prev: PrecedingFrame, val roll1: Int) : CompleteFrame {
+    val roll2 get() = 10 - roll1
+}
 data class Strike(override val prev: PrecedingFrame) : CompleteFrame
 
 
