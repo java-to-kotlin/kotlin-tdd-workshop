@@ -56,7 +56,7 @@ fun runController(): ControllerController {
     )
 }
 
-infix fun ControllerController.`⟵`(data: String) : ControllerController = apply {
+infix fun ControllerController.`⟵`(data: String): ControllerController = apply {
     toController.appendLine(data)
     toController.flush()
 }
@@ -71,23 +71,28 @@ class FunctionalTest {
     
     @Test
     @Timeout(1, unit = SECONDS)
-    fun `start of game, one open frame`() {
-           theController `⟵` "START 2"
-           theController `⟶` "RESET"
-           theController `⟵` "READY"
-           theController `⟶` "PLAYER 0"
-           theController `⟶` "PLAYER 0"
-           theController `⟶` "NEXT 0"
-           theController `⟵` "PINFALL 2"
-           theController `⟶` "SET PARTIAL"
-           theController `⟶` "PLAYER 2,,2 2"
-           theController `⟶` "PLAYER 0"
-           theController `⟶` "NEXT 0"
-           theController `⟵` "PINFALL 5"
-           theController `⟶` "SET PARTIAL"
-           theController `⟶` "PLAYER 2,5,7 7"
-           theController `⟶` "PLAYER 0"
-           theController `⟶` "NEXT 1"
+    fun `start of game, all players play the first frame`() {
+        theController `⟵` "START 2"
+        theController `⟶` "RESET"
+        theController `⟵` "READY"
+        theController `⟶` "PLAYER 0"
+        theController `⟶` "PLAYER 0"
+        theController `⟶` "NEXT 0"
+        theController `⟵` "PINFALL 2"
+        theController `⟶` "SET PARTIAL"
+        theController `⟶` "PLAYER 2,,2 2"
+        theController `⟶` "PLAYER 0"
+        theController `⟶` "NEXT 0"
+        theController `⟵` "PINFALL 5"
+        theController `⟶` "SET FULL"
+        theController `⟶` "PLAYER 2,5,7 7"
+        theController `⟶` "PLAYER 0"
+        theController `⟶` "NEXT 1"
+        theController `⟵` "PINFALL 10"
+        theController `⟶` "SET FULL"
+        theController `⟶` "PLAYER 2,5,7 7"
+        theController `⟶` "PLAYER 10,,10 10"
+        theController `⟶` "NEXT 0"
     }
     
     @AfterEach
