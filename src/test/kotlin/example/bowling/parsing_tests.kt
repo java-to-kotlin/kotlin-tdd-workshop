@@ -1,9 +1,5 @@
-package example.bowling.ftest
+package example.bowling
 
-import example.bowling.Pinfall
-import example.bowling.PinsetterReady
-import example.bowling.StartGame
-import example.bowling.toControllerInput
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.property.assume
 import kotlin.test.assertTrue

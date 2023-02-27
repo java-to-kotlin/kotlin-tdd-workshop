@@ -7,4 +7,9 @@ data class ViewState(
 
 
 internal fun ViewState.toLines(): List<String> =
-    playerScores.map { "PLAYER ${it.total}" } + "NEXT $nextPlayerToBowl"
+    playerScores.map {
+        "PLAYER ${(it.map { f -> f.toScoreLineElement() } + "${it.total}").joinToString(" ")}"
+    } + "NEXT $nextPlayerToBowl"
+
+private fun FrameScore.toScoreLineElement(): String =
+    "${roll1 ?: ""},${roll2 ?: ""},$runningTotal"

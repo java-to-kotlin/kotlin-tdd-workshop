@@ -56,7 +56,7 @@ private fun LaneState.eval(inputMessage: ControllerInput): Step = when (inputMes
     
     PinsetterReady -> when (this) {
         is ResettingPinsetter ->
-            Step(newState = GameInProgress(playerGames = (1..playerCount).map { UnplayedFrame }))
+            Step(newState = GameInProgress(playerGames = (1..playerCount).map { StartOfGame }))
         
         else -> ignoreInput()
     }
