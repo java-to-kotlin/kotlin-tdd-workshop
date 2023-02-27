@@ -26,3 +26,12 @@ fun Frame.roll(pinfall: Int): Frame {
 
 fun GameInProgress.nextPlayerToBowl(): Int =
     playerGames.indexOfFirst { it !is CompleteFrame }.takeUnless { it < 0 } ?: 0
+
+fun GameInProgress.roll(pinfall: Int) =
+    copy(playerGames = playerGames.mapAtIndex(nextPlayerToBowl()) { it.roll(pinfall) })
+
+inline fun <E> List<E>.mapAtIndex(i: Int, f: (E)->E): List<E> =
+    set(i, f(get(i)))
+
+fun <E> List<E>.set(i: Int, e: E): List<E> =
+    toMutableList().apply { set(i, e) }

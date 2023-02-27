@@ -67,19 +67,18 @@ private fun LaneState.eval(inputMessage: ControllerInput): Step = when (inputMes
             is ResettingPinsetter -> ignoreInput()
             is GameInProgress ->
                 Step(
-                    newState = copy(playerGames = playerGames.set(0, playerGames.get(0).roll(inputMessage.pinfall))),
+                    newState = roll(inputMessage.pinfall),
                     command = SetPartial
                 )
         }
 }
 
 
+
 fun LaneState.ignoreInput() =
     Step(this)
 
 
-private fun <E> List<E>.set(i: Int, e: E): List<E> =
-    toMutableList().apply { set(i, e) }
 
 
 sealed interface ControllerInput
