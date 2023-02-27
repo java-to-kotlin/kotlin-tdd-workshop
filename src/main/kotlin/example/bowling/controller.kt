@@ -40,7 +40,7 @@ private fun LaneState.toViewState(): ViewState? = when (this) {
 private fun GameInProgress.toViewState() =
     ViewState(
         playerScores = playerGames.map { it.score() },
-        nextPlayerToBowl = 0
+        nextPlayerToBowl = nextPlayerToBowl()
     )
 
 

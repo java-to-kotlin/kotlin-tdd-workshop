@@ -24,3 +24,5 @@ fun Frame.roll(pinfall: Int): Frame {
     }
 }
 
+fun GameInProgress.nextPlayerToBowl(): Int =
+    playerGames.indexOfFirst { it !is CompleteFrame }.takeUnless { it < 0 } ?: 0
