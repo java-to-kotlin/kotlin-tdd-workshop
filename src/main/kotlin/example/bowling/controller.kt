@@ -65,11 +65,14 @@ private fun LaneState.eval(inputMessage: ControllerInput): Step = when (inputMes
         when (this) {
             BetweenGames -> ignoreInput()
             is ResettingPinsetter -> ignoreInput()
-            is GameInProgress ->
+            is GameInProgress -> {
+                val player = nextPlayerToBowl()
+                val newState = roll(inputMessage.pinfall)
                 Step(
-                    newState = roll(inputMessage.pinfall),
-                    command = SetPartial
+                    newState = newState,
+                    command = if (newState.playerGames[player] is CompleteFrame) SetFull else SetPartial
                 )
+            }
         }
 }
 
