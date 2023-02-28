@@ -2,6 +2,7 @@ package example.bowling
 
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.plus
 
 typealias PlayerScores = List<FrameScore>
 
@@ -16,7 +17,7 @@ data class FrameScore(
 
 
 fun Frame.score(): PlayerScores =
-    scoreFrames().calculateTotals()
+    scoreFrames().asReversed().calculateTotals()
 
 private fun List<FrameBonus>.calculateTotals(): List<FrameScore> =
     fold(emptyList()) { acc, f ->
@@ -38,31 +39,30 @@ private val FrameBonus.score
         (roll1 ?: 0) + (roll2 ?: 0) + bonus
 
 
-private fun Frame.scoreFrames(
+private tailrec fun Frame.scoreFrames(
     acc: PersistentList<FrameBonus> = persistentListOf(),
     bonusRolls: Pair<Int, Int> = Pair(0, 0)
-): List<FrameBonus> {
-    return when (this) {
+): List<FrameBonus> =
+    when (this) {
         StartOfGame -> acc
+        
         is PartialFrame ->
-            prev.scoreFrames(acc, bonusRolls.push(roll1)) +
-                FrameBonus(roll1, null, 0)
+            prev.scoreFrames(acc + FrameBonus(roll1, null, 0), bonusRolls.push(roll1))
+        
         is OpenFrame ->
-            prev.scoreFrames(acc, bonusRolls.push(roll1, roll2)) +
-                FrameBonus(roll1, roll2, 0)
+            prev.scoreFrames(acc + FrameBonus(roll1, roll2, 0), bonusRolls.push(roll1, roll2))
+            
         is Spare ->
-            prev.scoreFrames(acc, bonusRolls.push(roll1, roll2)) +
-                FrameBonus(roll1, 10 - roll1, bonusRolls.first)
+            prev.scoreFrames(acc + FrameBonus(roll1, 10 - roll1, bonusRolls.first), bonusRolls.push(roll1, roll2))
+        
         is Strike ->
-            prev.scoreFrames(acc, bonusRolls.push(10)) +
-                FrameBonus(10, null, bonusRolls.first + bonusRolls.second)
+            prev.scoreFrames(acc + FrameBonus(10, null, bonusRolls.first + bonusRolls.second), bonusRolls.push(10))
     }
-}
 
 
 private fun Pair<Int, Int>.push(i: Int) =
     Pair(first = i, second = first)
 
 @Suppress("UnusedReceiverParameter")
-private fun Pair<Int,Int>.push(roll1: Int, roll2: Int) =
+private fun Pair<Int, Int>.push(roll1: Int, roll2: Int) =
     Pair(roll1, roll2)
