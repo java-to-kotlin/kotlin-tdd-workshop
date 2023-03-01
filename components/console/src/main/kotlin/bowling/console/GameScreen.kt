@@ -181,6 +181,7 @@ fun FrameView(
 private fun FrameScore.firstRollAsText(): String =
     when (val r = this.firstRoll) {
         null, pinCount -> ""
+        0 -> "–"
         else -> r.toString()
     }
 
@@ -190,7 +191,7 @@ private fun FrameScore.secondRollAsText(): String {
         firstRoll == null -> ""
         secondRoll == null -> ""
         firstRoll + secondRoll == pinCount -> "/"
+        secondRoll == 0 -> "–"
         else -> secondRoll.toString()
     }
 }
-
