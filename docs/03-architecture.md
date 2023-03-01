@@ -59,7 +59,7 @@ You -u- FakePinsetter
 
 ```plantuml
 hide footbox
-skinparam lifelineStrategy nosolid
+skinparam lifelineStrategy solid
 
 participant Console
 participant Peer
@@ -124,7 +124,7 @@ space = " "
 
 ```plantuml
 hide footbox
-skinparam lifelineStrategy nosolid
+skinparam lifelineStrategy solid
 
 participant Peer
 participant Pinsetter
@@ -177,7 +177,7 @@ The Controller performs the Peer side of both the Pinsetter and Console protocol
 ```plantuml
 @startuml
 hide footbox
-skinparam lifelineStrategy nosolid
+skinparam lifelineStrategy solid
 
 participant Controller
 participant Multiplexer
