@@ -1,3 +1,5 @@
+import org.gradle.configurationcache.extensions.capitalized
+
 plugins {
     kotlin("jvm") version "1.8.0" apply false
     id("org.jetbrains.compose") version "1.3.0" apply false
@@ -8,8 +10,15 @@ val runnableComponents = listOf("console", "fake-pinsetter", "multiplexer")
 
 val workshopDir = rootDir.resolve("workshop")
 
-runnableComponents.forEach { c ->
-    tasks.register<Copy>("gather-$c") {
+val mkWorkshopDir = tasks.register("mkWorkshopDir") {
+    doLast {
+        mkdir(workshopDir)
+    }
+}
+
+val prepareComponentTasks = runnableComponents.map { c ->
+    tasks.register<Copy>("prepare${c.split("-").map{it.capitalized()}.joinToString("")}") {
+        dependsOn(mkWorkshopDir)
         dependsOn("components:$c:installDist")
         
         from(project("components:$c").buildDir.resolve("install"))
@@ -18,24 +27,28 @@ runnableComponents.forEach { c ->
     }
 }
 
-val gatherScripts = tasks.register<Copy>("gather-scripts") {
+val prepareScripts = tasks.register<Copy>("prepareScripts") {
+    dependsOn(mkWorkshopDir)
     from(projectDir.resolve("src/main/scripts"))
     into(workshopDir)
     include("**")
 }
 
-val gatherDocs = tasks.register<Copy>("gather-docs") {
-    from(projectDir)
-    into(workshopDir)
-    include("docs/**")
+val prepareDocs = tasks.register<Exec>("prepareDocs") {
+    dependsOn(mkWorkshopDir)
+    
+    executable = projectDir.resolve("build-doc").absolutePath
+    args(
+        "--output",
+        workshopDir.resolve("handout.pdf").absolutePath
+    )
+    workingDir = buildDir
 }
 
-tasks.register("workshop") {
-    runnableComponents.forEach { c ->
-        dependsOn("gather-$c")
-    }
-    dependsOn(gatherScripts)
-    dependsOn(gatherDocs)
+tasks.register("prepareWorkshop") {
+    prepareComponentTasks.forEach { c -> dependsOn(c) }
+    dependsOn(prepareScripts)
+    dependsOn(prepareDocs)
 }
 
 defaultTasks(

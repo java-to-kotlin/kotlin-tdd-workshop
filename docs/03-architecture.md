@@ -1,6 +1,4 @@
-# Protocols
-
-## Components
+# Architecture
 
 A set of software components run the games for a single bowling lane.
 
@@ -218,6 +216,4 @@ loop until end of game
 end
 @enduml
 ```
-
-
 
