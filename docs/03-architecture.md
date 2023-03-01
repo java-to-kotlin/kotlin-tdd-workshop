@@ -28,7 +28,7 @@ Bowler -u- Console
 
 In this workshop we are going to write the _Controller_.
 
-## Deployment for testing the Controller locally during development.  
+## Testing the Controller locally during development
 
 We simulate the Pinsetter in software on the developer machine and communicate with the fake pinsetter over Unix pipes.
 
@@ -85,11 +85,11 @@ loop
 end
 ```
 
-#### ABNF Grammar
+### ABNF Grammar
 
 ```
 Inputs = 
-     "RESET"
+    "RESET"
   | "SET space "PARTIAL"
   | "SET" space "FULL"
 
@@ -130,7 +130,7 @@ loop until end of game
 end
 ```
 
-#### ABNF Grammar
+### ABNF Grammar
 
 ```
 Inputs = 
@@ -165,7 +165,7 @@ score = /[0-9]+/
 space = " "
 ```
 
-### Messages to/from the Controller
+## Messages to/from the Controller
 
 The Controller performs the Peer side of both the Pinsetter and Console protocols and relies on the Multiplexer to route messages to/from the other components.
 

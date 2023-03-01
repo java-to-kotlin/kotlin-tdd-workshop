@@ -4,6 +4,6 @@
 find "$(dirname "$0")/docs" -name "*.md" -print0 | \
   sort -z | \
   xargs -0 -n 1 cat | \
-  pandoc --metadata title="TDD Workshop" \
+  pandoc --metadata title="Ten-Pin Bowling TDD Workshop" \
     --standalone \
     --filter pandoc-plantuml --from markdown "$@"
