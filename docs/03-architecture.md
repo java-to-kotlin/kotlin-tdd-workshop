@@ -55,56 +55,12 @@ You -u- FakePinsetter
 
 ## Message flows
 
-### Pinsetter protocol
-
-
-```plantuml
-participant Peer
-participant Pinsetter
-
-
-Peer -> Pinsetter : RESET
-note right : Handshake to (re)sync state of peer & hardware
-note over Peer : Peer ignores all messages \nuntil it receives READY 
-Pinsetter -> Peer : READY
-
-loop
-    Pinsetter -> Peer : PINFALL <n>
-    note right : Report pins knocked down by roll
-    alt
-        Pinsetter <- Peer : SET PARTIAL
-        activate Pinsetter
-        note right : Clear the lane of fallen pins\nSet pins that were standing for next roll
-        deactivate Pinsetter
-    else
-        Pinsetter <- Peer : SET FULL 
-        activate Pinsetter
-        note right : Clear the lane of fallen pins\nSet all pins for next roll
-        deactivate Pinsetter
-    end
-end
-```
-
-### ABNF Grammar
-
-```
-Inputs = 
-    "RESET"
-  | "SET space "PARTIAL"
-  | "SET" space "FULL"
-
-Outputs = 
-    "READY"
-  | "PINFALL" pin_count
-
-pin_count = /[1-9][0-9]*/
-
-space = " "
-```
-
 ### Console protocol
 
 ```plantuml
+hide footbox
+skinparam lifelineStrategy nosolid
+
 participant Console
 participant Peer
 
@@ -164,6 +120,55 @@ score = /[0-9]+/
 
 space = " "
 ```
+### Pinsetter protocol
+
+```plantuml
+hide footbox
+skinparam lifelineStrategy nosolid
+
+participant Peer
+participant Pinsetter
+
+
+Peer -> Pinsetter : RESET
+note right : Handshake to (re)sync state of peer & hardware
+note over Peer : Peer ignores all messages \nuntil it receives READY 
+Pinsetter -> Peer : READY
+
+loop
+    Pinsetter -> Peer : PINFALL <n>
+    note right : Report pins knocked down by roll
+    alt
+        Pinsetter <- Peer : SET PARTIAL
+        activate Pinsetter
+        note right : Clear the lane of fallen pins\nSet pins that were standing for next roll
+        deactivate Pinsetter
+    else
+        Pinsetter <- Peer : SET FULL 
+        activate Pinsetter
+        note right : Clear the lane of fallen pins\nSet all pins for next roll
+        deactivate Pinsetter
+    end
+end
+```
+
+### ABNF Grammar
+
+```
+Inputs = 
+    "RESET"
+  | "SET space "PARTIAL"
+  | "SET" space "FULL"
+
+Outputs = 
+    "READY"
+  | "PINFALL" pin_count
+
+pin_count = /[1-9][0-9]*/
+
+space = " "
+```
+
 
 ## Messages to/from the Controller
 
@@ -171,6 +176,9 @@ The Controller performs the Peer side of both the Pinsetter and Console protocol
 
 ```plantuml
 @startuml
+hide footbox
+skinparam lifelineStrategy nosolid
+
 participant Controller
 participant Multiplexer
 
