@@ -1,5 +1,5 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -i /bin/bash -p pandoc pandoc-plantuml-filter plantuml
+#!nix-shell -i /bin/bash -p pandoc pandoc-plantuml-filter plantuml texlive.combined.scheme-small
 
 find "$(dirname "$0")/docs" -name "*.md" -print0 | \
   sort -z | \

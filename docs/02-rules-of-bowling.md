@@ -20,3 +20,4 @@ The scorecard is divided into 10 frames and each frame is divided into two boxes
 * A zero is recorded with a “-“.
 
 In modern bowling alleys, the scoring is automatic and the scorecard is displayed on a computer monitor.
+
