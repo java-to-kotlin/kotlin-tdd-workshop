@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Controller" type="JetRunConfigurationType" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="example.bowling.Controller" />
+    <module name="kotlinconf-2023-bowling-kata.main" />
+    <option name="PROGRAM_PARAMETERS" value="workshop/pipes/multiplexer-to-controller workshop/pipes/controller-to-multiplexer" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

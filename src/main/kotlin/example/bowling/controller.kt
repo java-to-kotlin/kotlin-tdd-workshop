@@ -1,3 +1,4 @@
+@file:JvmName("Controller")
 package example.bowling
 
 import java.io.BufferedReader
