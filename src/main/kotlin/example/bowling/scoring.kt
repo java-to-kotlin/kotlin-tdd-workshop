@@ -57,6 +57,9 @@ private tailrec fun Frame.scoreFrames(
         
         is Strike ->
             prev.scoreFrames(acc + FrameBonus(10, null, bonusRolls.first + bonusRolls.second), bonusRolls.push(10))
+        
+        is FinalOpenFrame ->
+            prev.scoreFrames(acc + FrameBonus(roll1, roll2, 0), bonusRolls.push(roll1, roll2))
     }
 
 

@@ -1,22 +1,41 @@
 package example.bowling
 
 sealed interface Frame
-sealed interface PrecedingFrame : Frame
+sealed interface PrecedingFrame : Frame {
+    val framesRemaining: UInt
+}
+
 sealed interface FollowingFrame : Frame {
     val prev: PrecedingFrame
 }
 
 sealed interface CompleteFrame : PrecedingFrame, FollowingFrame
+sealed interface GameOver : CompleteFrame
+
 object StartOfGame : PrecedingFrame {
+    override val framesRemaining: UInt = 10u
+    
     override fun toString(): String = this::class.simpleName ?: "<UNKNOWN>"
 }
 
 data class PartialFrame(override val prev: PrecedingFrame, val roll1: Int) : FollowingFrame
-data class OpenFrame(override val prev: PrecedingFrame, val roll1: Int, val roll2: Int) : CompleteFrame
+data class OpenFrame(override val prev: PrecedingFrame, val roll1: Int, val roll2: Int) : CompleteFrame {
+    override val framesRemaining: UInt = prev.framesRemaining - 1u
+}
+
 data class Spare(override val prev: PrecedingFrame, val roll1: Int) : CompleteFrame {
     val roll2 get() = 10 - roll1
+    
+    override val framesRemaining: UInt = prev.framesRemaining - 1u
 }
-data class Strike(override val prev: PrecedingFrame) : CompleteFrame
+
+data class Strike(override val prev: PrecedingFrame) : CompleteFrame {
+    override val framesRemaining: UInt = prev.framesRemaining - 1u
+}
+
+data class FinalOpenFrame(override val prev: PrecedingFrame, val roll1: Int, val roll2: Int) : GameOver {
+    override val framesRemaining: UInt = prev.framesRemaining - 1u
+}
 
 
 fun Frame.roll(pinfall: Int): Frame {
@@ -26,12 +45,19 @@ fun Frame.roll(pinfall: Int): Frame {
             else -> PartialFrame(this, pinfall)
         }
         
-        is PartialFrame -> when (pinfall) {
-            10 - roll1 -> Spare(prev, roll1)
-            else -> OpenFrame(prev, roll1, pinfall)
+        is PartialFrame -> when {
+            isLastFrame -> FinalOpenFrame(prev, roll1, pinfall)
+            else -> when (pinfall) {
+                10 - roll1 -> Spare(prev, roll1)
+                else -> OpenFrame(prev, roll1, pinfall)
+            }
         }
     }
 }
+
+val PartialFrame.isLastFrame: Boolean
+    get() =
+        prev.framesRemaining == 1u
 
 private tailrec fun Frame.count(acc: Int = 0): Int =
     when (this) {

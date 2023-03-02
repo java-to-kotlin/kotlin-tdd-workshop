@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
 
 class NextPlayerToBowlTest {
-    val newGame = GameInProgress(
+    private val newGame = GameInProgress(
         StartOfGame,
         StartOfGame,
         StartOfGame
@@ -57,6 +57,20 @@ class NextPlayerToBowlTest {
     }
 }
 
-fun GameInProgress(vararg playerState : Frame) =
+class EndOfGameTest {
+    @Test
+    fun `game over after final open frame`() {
+        val startOfLastFrame = (1..9)
+            .fold(StartOfGame as Frame) { game, _ -> game.roll(1).roll(2) }
+        
+        startOfLastFrame
+            .roll(1)
+            .also { assertTrue(it !is GameOver) }
+            .roll(2)
+            .also { assertTrue(it is GameOver) }
+    }
+}
+
+fun GameInProgress(vararg playerState: Frame) =
     GameInProgress(playerState.asList())
 
