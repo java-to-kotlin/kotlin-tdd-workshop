@@ -60,6 +60,13 @@ private tailrec fun Frame.scoreFrames(
         
         is FinalOpenFrame ->
             prev.scoreFrames(acc + FrameBonus(roll1, roll2, 0), bonusRolls.push(roll1, roll2))
+    
+        is IncompleteFinalSpare ->
+            TODO()
+            //prev.scoreFrames(acc + FrameBonus(roll1, roll2, bonusRolls.first), bonusRolls.push(roll1, roll2))
+        is FinalBonusRoll ->
+            TODO()
+            //prev.scoreFrames(acc, bonusRolls.push(bonusRoll))
     }
 
 

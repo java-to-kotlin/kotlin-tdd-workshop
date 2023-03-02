@@ -10,7 +10,7 @@ sealed interface FollowingFrame : Frame {
 }
 
 sealed interface CompleteFrame : PrecedingFrame, FollowingFrame
-sealed interface GameOver : CompleteFrame
+sealed interface GameOver : FollowingFrame
 
 object StartOfGame : PrecedingFrame {
     override val framesRemaining: UInt = 10u
@@ -33,25 +33,37 @@ data class Strike(override val prev: PrecedingFrame) : CompleteFrame {
     override val framesRemaining: UInt = prev.framesRemaining - 1u
 }
 
-data class FinalOpenFrame(override val prev: PrecedingFrame, val roll1: Int, val roll2: Int) : GameOver {
-    override val framesRemaining: UInt = prev.framesRemaining - 1u
+data class FinalOpenFrame(override val prev: PrecedingFrame, val roll1: Int, val roll2: Int) : GameOver
+
+data class IncompleteFinalSpare(override val prev: PrecedingFrame, val roll1: Int) : FollowingFrame {
+    val roll2 get() = 10 - roll1
 }
 
+data class FinalBonusRoll(override val prev: PrecedingFrame, val bonusRoll: Int) : GameOver
 
 fun Frame.roll(pinfall: Int): Frame {
     return when (this) {
+        is GameOver -> this
+        
         is PrecedingFrame -> when (pinfall) {
             10 -> Strike(this)
             else -> PartialFrame(this, pinfall)
         }
         
         is PartialFrame -> when {
-            isLastFrame -> FinalOpenFrame(prev, roll1, pinfall)
+            isLastFrame -> when (pinfall) {
+                10 - roll1 -> IncompleteFinalSpare(prev, roll1)
+                else -> FinalOpenFrame(prev, roll1, pinfall)
+            }
             else -> when (pinfall) {
                 10 - roll1 -> Spare(prev, roll1)
                 else -> OpenFrame(prev, roll1, pinfall)
             }
         }
+        
+        is IncompleteFinalSpare ->
+            FinalBonusRoll(prev, pinfall)
+            
     }
 }
 
