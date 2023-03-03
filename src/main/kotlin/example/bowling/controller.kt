@@ -1,4 +1,5 @@
 @file:JvmName("Controller")
+
 package example.bowling
 
 import java.io.BufferedReader
@@ -9,7 +10,7 @@ fun main(args: Array<String>) =
     controller(File(args[0]).bufferedReader(), File(args[1]).bufferedWriter())
 
 fun controller(input: BufferedReader, output: BufferedWriter) {
-    var game: LaneState = BetweenGames
+    var game: LaneState = Initialising
     
     while (true) {
         val inputLine = input.readLine() ?: break // end of stream
@@ -26,23 +27,43 @@ fun controller(input: BufferedReader, output: BufferedWriter) {
 
 
 sealed interface LaneState
-object BetweenGames : LaneState
+object Initialising : LaneState
 data class ResettingPinsetter(val playerCount: Int) : LaneState
 data class GameInProgress(val playerGames: List<Frame>) : LaneState
 
 
-
 private fun LaneState.toViewState(): ViewState? = when (this) {
-    BetweenGames -> null
+    Initialising -> null
     is ResettingPinsetter -> null
     is GameInProgress -> toViewState()
 }
 
-private fun GameInProgress.toViewState() =
-    ViewState(
-        playerScores = playerGames.map { it.score() },
-        nextPlayerToBowl = nextPlayerToBowl()
-    )
+private fun GameInProgress.toViewState(): ViewState {
+    val playerScores = scores()
+    
+    return if (gameIsOver()) {
+        GameOverViewState(
+            playerScores = playerScores,
+            winners = playerScores.winners()
+        )
+    } else {
+        GameInProgressViewState(
+            playerScores = playerScores,
+            nextPlayerToBowl = nextPlayerToBowl()
+        )
+    }
+}
+
+private fun GameInProgress.gameIsOver() =
+    playerGames.all { it is GameOver }
+
+private fun List<PlayerScores>.winners(): List<Int> {
+    val maxScore = maxOf { it.total }
+    return indices.filter { get(it).total == maxScore }
+}
+
+
+private fun GameInProgress.scores() = playerGames.map { it.score() }
 
 
 data class Step(
@@ -64,7 +85,7 @@ private fun LaneState.eval(inputMessage: ControllerInput): Step = when (inputMes
     
     is Pinfall ->
         when (this) {
-            BetweenGames -> ignoreInput()
+            Initialising -> ignoreInput()
             is ResettingPinsetter -> ignoreInput()
             is GameInProgress -> {
                 val player = nextPlayerToBowl()
@@ -78,11 +99,8 @@ private fun LaneState.eval(inputMessage: ControllerInput): Step = when (inputMes
 }
 
 
-
 fun LaneState.ignoreInput() =
     Step(this)
-
-
 
 
 sealed interface ControllerInput
