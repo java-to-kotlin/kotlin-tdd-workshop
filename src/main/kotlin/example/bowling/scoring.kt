@@ -45,28 +45,29 @@ private tailrec fun Frame.scoreFrames(
 ): List<FrameBonus> =
     when (this) {
         StartOfGame -> acc
-        
         is PartialFrame ->
             prev.scoreFrames(acc + FrameBonus(roll1, null, 0), bonusRolls.push(roll1))
-        
         is OpenFrame ->
             prev.scoreFrames(acc + FrameBonus(roll1, roll2, 0), bonusRolls.push(roll1, roll2))
-            
         is Spare ->
             prev.scoreFrames(acc + FrameBonus(roll1, 10 - roll1, bonusRolls.first), bonusRolls.push(roll1, roll2))
-        
         is Strike ->
             prev.scoreFrames(acc + FrameBonus(10, null, bonusRolls.first + bonusRolls.second), bonusRolls.push(10))
-        
         is FinalOpenFrame ->
             prev.scoreFrames(acc + FrameBonus(roll1, roll2, 0), bonusRolls.push(roll1, roll2))
-    
         is IncompleteFinalSpare ->
             TODO()
             //prev.scoreFrames(acc + FrameBonus(roll1, roll2, bonusRolls.first), bonusRolls.push(roll1, roll2))
-        is FinalBonusRoll ->
-            TODO()
+        is CompleteFinalSpare ->
             //prev.scoreFrames(acc, bonusRolls.push(bonusRoll))
+            TODO()
+        is IncompleteFinalStrike ->
+            TODO()
+        is PenultimateBonusRollForFinalStrike ->
+            //prev.scoreFrames(acc, bonusRolls.push(bonusRoll))
+            TODO()
+        is CompleteFinalStrike ->
+            TODO()
     }
 
 

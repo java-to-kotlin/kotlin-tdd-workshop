@@ -83,6 +83,20 @@ class EndOfGameTest {
             .roll(1)
             .also { assertTrue(it is GameOver) }
     }
+    
+    @Test
+    fun `game over after two bonus rolls after final strike`() {
+        val startOfLastFrame = (1..9)
+            .fold(StartOfGame as Frame) { game, _ -> game.roll(1).roll(2) }
+        
+        startOfLastFrame
+            .roll(10)
+            .also { assertTrue(it !is GameOver) }
+            .roll(1)
+            .also { assertTrue(it !is GameOver) }
+            .roll(2)
+            .also { assertTrue(it is GameOver) }
+    }
 }
 
 fun GameInProgress(vararg playerState: Frame) =

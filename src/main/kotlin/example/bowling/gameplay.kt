@@ -39,14 +39,34 @@ data class IncompleteFinalSpare(override val prev: PrecedingFrame, val roll1: In
     val roll2 get() = 10 - roll1
 }
 
-data class FinalBonusRoll(override val prev: PrecedingFrame, val bonusRoll: Int) : GameOver
+data class CompleteFinalSpare(override val prev: PrecedingFrame, val roll1: Int, val bonusRoll: Int) : GameOver {
+    val roll2 get() = 10 - roll1
+}
+
+data class IncompleteFinalStrike(override val prev: PrecedingFrame) : FollowingFrame
+
+data class PenultimateBonusRollForFinalStrike(override val prev: PrecedingFrame, val bonusRoll1: Int) : FollowingFrame
+
+data class CompleteFinalStrike(override val prev: PrecedingFrame, val bonusRoll1: Int, val bonusRoll2: Int) : GameOver
 
 fun Frame.roll(pinfall: Int): Frame {
     return when (this) {
         is GameOver -> this
         
+        is IncompleteFinalSpare ->
+            CompleteFinalSpare(prev, roll1, pinfall)
+        
+        is IncompleteFinalStrike ->
+            PenultimateBonusRollForFinalStrike(prev, pinfall)
+        
+        is PenultimateBonusRollForFinalStrike ->
+            CompleteFinalStrike(prev, bonusRoll1, pinfall)
+        
         is PrecedingFrame -> when (pinfall) {
-            10 -> Strike(this)
+            10 -> when {
+                isPenultimateFrame -> IncompleteFinalStrike(this)
+                else -> Strike(this)
+            }
             else -> PartialFrame(this, pinfall)
         }
         
@@ -55,21 +75,20 @@ fun Frame.roll(pinfall: Int): Frame {
                 10 - roll1 -> IncompleteFinalSpare(prev, roll1)
                 else -> FinalOpenFrame(prev, roll1, pinfall)
             }
+            
             else -> when (pinfall) {
                 10 - roll1 -> Spare(prev, roll1)
                 else -> OpenFrame(prev, roll1, pinfall)
             }
         }
-        
-        is IncompleteFinalSpare ->
-            FinalBonusRoll(prev, pinfall)
-            
     }
 }
 
-val PartialFrame.isLastFrame: Boolean
-    get() =
-        prev.framesRemaining == 1u
+val PrecedingFrame.isPenultimateFrame: Boolean
+    get() = framesRemaining == 1u
+
+val FollowingFrame.isLastFrame: Boolean
+    get() = prev.isPenultimateFrame
 
 private tailrec fun Frame.count(acc: Int = 0): Int =
     when (this) {
