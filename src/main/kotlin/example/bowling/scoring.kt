@@ -47,29 +47,35 @@ private tailrec fun Frame.scoreFrames(
         StartOfGame -> acc
         is PartialFrame ->
             prev.scoreFrames(acc + FrameBonus(roll1, null, 0), bonusRolls.push(roll1))
+        
         is OpenFrame ->
             prev.scoreFrames(acc + FrameBonus(roll1, roll2, 0), bonusRolls.push(roll1, roll2))
+        
         is Spare ->
             prev.scoreFrames(acc + FrameBonus(roll1, 10 - roll1, bonusRolls.first), bonusRolls.push(roll1, roll2))
+        
         is Strike ->
             prev.scoreFrames(acc + FrameBonus(10, null, bonusRolls.first + bonusRolls.second), bonusRolls.push(10))
+        
         is FinalOpenFrame ->
             prev.scoreFrames(acc + FrameBonus(roll1, roll2, 0), bonusRolls.push(roll1, roll2))
+        
         is IncompleteFinalSpare ->
             TODO()
-            //prev.scoreFrames(acc + FrameBonus(roll1, roll2, bonusRolls.first), bonusRolls.push(roll1, roll2))
+        //prev.scoreFrames(acc + FrameBonus(roll1, roll2, bonusRolls.first), bonusRolls.push(roll1, roll2))
         is CompleteFinalSpare ->
             //prev.scoreFrames(acc, bonusRolls.push(bonusRoll))
             TODO()
+        
         is IncompleteFinalStrike ->
-            TODO()
+            prev.scoreFrames(acc + FrameBonus(10, null, 0))
+        
         is PenultimateBonusRollForFinalStrike ->
-            //prev.scoreFrames(acc, bonusRolls.push(bonusRoll))
-            TODO()
+            prev.scoreFrames(acc + FrameBonus(10, null, bonusRoll1), bonusRolls.push(10, bonusRoll1))
+        
         is CompleteFinalStrike ->
-            TODO()
+            prev.scoreFrames(acc + FrameBonus(10, null, bonusRoll1+bonusRoll2), bonusRolls.push(10, bonusRoll1))
     }
-
 
 private fun Pair<Int, Int>.push(i: Int) =
     Pair(first = i, second = first)

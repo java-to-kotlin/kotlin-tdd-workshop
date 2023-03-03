@@ -99,4 +99,23 @@ class GameScoreTests {
                 )
             }
     }
+    
+    @Test
+    fun `last roll is a strike`() {
+        val beforeLastFrame = (1..9).fold(StartOfGame as Frame) { game, _ -> game.roll(0).roll(0) }
+        
+        beforeLastFrame
+            .roll(10)
+            .also {
+                assertTrue(it.score().last() == FrameScore(10, null, runningTotal = 10))
+            }
+            .roll(1)
+            .also {
+                assertTrue(it.score().last() == FrameScore(10, null, runningTotal = 11))
+            }
+            .roll(2)
+            .also {
+                assertTrue(it.score().last() == FrameScore(10, null, runningTotal = 13))
+            }
+    }
 }
