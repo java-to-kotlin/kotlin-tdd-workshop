@@ -101,7 +101,7 @@ class GameScoreTests {
     }
     
     @Test
-    fun `last roll is a strike`() {
+    fun `last frame is a strike`() {
         val beforeLastFrame = (1..9).fold(StartOfGame as Frame) { game, _ -> game.roll(0).roll(0) }
         
         beforeLastFrame
@@ -117,5 +117,52 @@ class GameScoreTests {
             .also {
                 assertTrue(it.score().last() == FrameScore(10, null, runningTotal = 13))
             }
+    }
+    
+    @Test
+    fun `last frame is a spare`() {
+        val beforeLastFrame = (1..9).fold(StartOfGame as Frame) { game, _ -> game.roll(0).roll(0) }
+        
+        beforeLastFrame
+            .roll(7)
+            .also {
+                assertTrue(it.score().last() == FrameScore(7, null, runningTotal = 7))
+            }
+            .roll(3)
+            .also {
+                assertTrue(it.score().last() == FrameScore(7, 3, runningTotal = 10))
+            }
+            .roll(4)
+            .also {
+                assertTrue(it.score().last() == FrameScore(7, 3, runningTotal = 14))
+            }
+    }
+    
+    @Test
+    fun `strike before final spare`() {
+        val scores = (1..8)
+            .fold(StartOfGame as Frame) { game, _ -> game.roll(0).roll(0) }
+            .roll(10)
+            .roll(8)
+            .roll(2)
+            .roll(3)
+            .score()
+        
+        assertTrue(scores[scores.size - 2] == FrameScore(10, null, 20))
+        assertTrue(scores[scores.size - 1] == FrameScore(8, 2, 33))
+    }
+    
+    @Test
+    fun `strike before final strike`() {
+        val scores = (1..8)
+            .fold(StartOfGame as Frame) { game, _ -> game.roll(0).roll(0) }
+            .roll(10)
+            .roll(10)
+            .roll(2)
+            .roll(3)
+            .score()
+        
+        assertTrue(scores[scores.size - 2] == FrameScore(10, null, 22))
+        assertTrue(scores[scores.size - 1] == FrameScore(10, null, 37))
     }
 }

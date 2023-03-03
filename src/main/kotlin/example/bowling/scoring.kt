@@ -61,11 +61,10 @@ private tailrec fun Frame.scoreFrames(
             prev.scoreFrames(acc + FrameBonus(roll1, roll2, 0), bonusRolls.push(roll1, roll2))
         
         is IncompleteFinalSpare ->
-            TODO()
-        //prev.scoreFrames(acc + FrameBonus(roll1, roll2, bonusRolls.first), bonusRolls.push(roll1, roll2))
+            prev.scoreFrames(acc + FrameBonus(roll1, roll2, 0), bonusRolls.push(roll1, roll2))
+        
         is CompleteFinalSpare ->
-            //prev.scoreFrames(acc, bonusRolls.push(bonusRoll))
-            TODO()
+            prev.scoreFrames(acc + FrameBonus(roll1, roll2, bonusRoll), bonusRolls.push(roll1, roll2))
         
         is IncompleteFinalStrike ->
             prev.scoreFrames(acc + FrameBonus(10, null, 0))
