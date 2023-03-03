@@ -55,6 +55,49 @@ class NextPlayerToBowlTest {
             .roll(5).roll(1)
             .also { assertTrue(it.nextPlayerToBowl() == 0) }
     }
+    
+    @Test
+    fun `next player after final open frame`() {
+        startOfLastFrame()
+            .roll(1)
+            .also { assertTrue(it.nextPlayerToBowl() == 0) }
+            .roll(2)
+            .also { assertTrue(it.nextPlayerToBowl() == 1) }
+    }
+    
+    @Test
+    fun `next player after bonus roll for final spare`() {
+        startOfLastFrame()
+            .roll(4)
+            .also { assertTrue(it.nextPlayerToBowl() == 0) }
+            .roll(6)
+            .also { assertTrue(it.nextPlayerToBowl() == 0) }
+            .roll(2)
+            .also { assertTrue(it.nextPlayerToBowl() == 1) }
+    }
+    
+    @Test
+    fun `next player after bonus rolls for final strike`() {
+        startOfLastFrame()
+            .roll(10)
+            .also { assertTrue(it.nextPlayerToBowl() == 0) }
+            .roll(1)
+            .also { assertTrue(it.nextPlayerToBowl() == 0) }
+            .roll(2)
+            .also { assertTrue(it.nextPlayerToBowl() == 1) }
+    }
+    
+    private fun startOfLastFrame(): GameInProgress {
+        val lastFrame = (1..9).fold(newGame) { game, _ ->
+            (1..3).fold(game) { turn, _ ->
+                turn.roll(1).roll(1)
+            }
+        }
+        
+        assertTrue(lastFrame.nextPlayerToBowl() == 0)
+        
+        return lastFrame
+    }
 }
 
 class EndOfGameTest {

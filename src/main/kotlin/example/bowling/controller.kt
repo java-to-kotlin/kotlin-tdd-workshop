@@ -92,10 +92,18 @@ private fun LaneState.eval(inputMessage: ControllerInput): Step = when (inputMes
                 val newState = roll(inputMessage.pinfall)
                 Step(
                     newState = newState,
-                    command = if (newState.playerGames[player] is CompleteFrame) SetFull else SetPartial
+                    command = if (newState.playerGames[player].needsAllPinsSet()) SetFull else SetPartial
                 )
             }
         }
+}
+
+fun Frame.needsAllPinsSet() = when (this) {
+    is CompleteFrame, is GameOver -> true
+    is IncompleteFinalSpare -> true
+    is IncompleteFinalStrike -> true
+    is PenultimateBonusRollForFinalStrike -> bonusRoll1 == 10
+    else -> false
 }
 
 

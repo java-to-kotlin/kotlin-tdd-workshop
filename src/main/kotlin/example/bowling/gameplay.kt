@@ -99,7 +99,7 @@ private tailrec fun Frame.count(acc: Int = 0): Int =
 fun GameInProgress.nextPlayerToBowl(): Int {
     val frameCount = playerGames.first().count()
     return playerGames
-        .indexOfFirst { it !is CompleteFrame || it.count() < frameCount }
+        .indexOfFirst { (it !is CompleteFrame && it !is GameOver) || it.count() < frameCount }
         .takeUnless { it < 0 }
         ?: 0
 }
