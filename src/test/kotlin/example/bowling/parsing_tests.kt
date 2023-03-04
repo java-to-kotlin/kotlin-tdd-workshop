@@ -1,10 +1,10 @@
 package example.bowling
 
-import io.kotest.core.spec.style.AnnotationSpec
-import io.kotest.property.assume
+import org.junit.jupiter.api.Assumptions.assumeTrue
+import kotlin.test.Test
 import kotlin.test.assertTrue
 
-class StringToControllerInputTest : AnnotationSpec() {
+class StringToControllerInputTest {
     companion object {
         val examples = listOf(
             "START 2" to StartGame(playerCount = 2),
@@ -27,8 +27,7 @@ class StringToControllerInputTest : AnnotationSpec() {
     }
     
     @Test
-    @Ignore
     fun `TODO does not throw on invalid input`() {
-        assume(false)
+        assumeTrue(false)
     }
 }
