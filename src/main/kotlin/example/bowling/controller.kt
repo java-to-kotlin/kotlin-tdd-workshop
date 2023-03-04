@@ -54,7 +54,7 @@ private fun GameInProgress.toViewState(): ViewState {
     }
 }
 
-private fun GameInProgress.gameIsOver() =
+internal fun GameInProgress.gameIsOver() =
     playerGames.all { it is GameOver }
 
 private fun List<PlayerScores>.winners(): List<Int> {
@@ -72,7 +72,7 @@ data class Step(
 )
 
 
-private fun LaneState.eval(inputMessage: ControllerInput): Step = when (inputMessage) {
+internal fun LaneState.eval(inputMessage: ControllerInput): Step = when (inputMessage) {
     is StartGame ->
         Step(newState = ResettingPinsetter(playerCount = inputMessage.playerCount), command = Reset)
     

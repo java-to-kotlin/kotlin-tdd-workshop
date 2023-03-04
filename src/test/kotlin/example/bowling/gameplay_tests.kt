@@ -89,7 +89,7 @@ class NextPlayerToBowlTest {
     
     private fun startOfLastFrame(): GameInProgress {
         val lastFrame = (1..9).fold(newGame) { game, _ ->
-            (1..3).fold(game) { turn, _ ->
+            (1..newGame.playerCount()).fold(game) { turn, _ ->
                 turn.roll(1).roll(1)
             }
         }
@@ -141,6 +141,39 @@ class EndOfGameTest {
             .also { assertTrue(it is GameOver) }
     }
 }
+
+class StartNextGameTest {
+    private val newGame = GameInProgress(
+        StartOfGame,
+        StartOfGame
+    )
+    
+    @Test
+    fun todo() {
+        val game = afterLastFrame()
+        val newPlayerCount = 3
+        
+        val step1 = game.eval(StartGame(newPlayerCount))
+        
+        assertTrue(step1.command == Reset)
+        assertTrue(step1.newState == ResettingPinsetter(newPlayerCount))
+        
+        val step2 = step1.newState.eval(PinsetterReady)
+        
+        assertTrue(step2.command == null)
+        assertTrue(step2.newState == GameInProgress(StartOfGame, StartOfGame, StartOfGame))
+    }
+    
+    private fun afterLastFrame(): GameInProgress = (1..10)
+        .fold(newGame) { game, _ ->
+            (1..newGame.playerCount()).fold(game) { turn, _ ->
+                turn.roll(1).roll(2)
+            }
+        }.also { assertTrue(it.gameIsOver()) }
+}
+
+private fun GameInProgress.playerCount() = playerGames.size
+
 
 fun GameInProgress(vararg playerState: Frame) =
     GameInProgress(playerState.asList())
