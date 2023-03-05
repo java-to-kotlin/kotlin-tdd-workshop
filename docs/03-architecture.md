@@ -2,11 +2,6 @@
 
 A set of software components run the games for a single bowling lane.
 
-* The _Pinsetter_ controls the lane's pinsetter – a machine that automatically sets bowling pins back in their original positions, returns bowling balls to the front of the alley, and clears fallen pins from the pin deck.  The Pinsetter firmware communicates over serial cable with a text-based protocol.
-* The _Console_ is a graphical user interface with which the players' enter their names, start the game, and see the current scoreboard and next player to bowl.
-* The _Controller_ runs the game logic.  It keeps track of the players' turns and their scores.  It controls the _Pinsetter_ and updates the _Console_ as the game progresses.  It has a single input and output stream, and relies on the _Multiplexer_ to route messages to/from the other components.
-* The _Multiplexer_ routes messages between the _Controller_, _Console_ and _Pinsetter_.
-
 ```plantuml
 node Pinsetter {
     component Firmware
@@ -25,6 +20,11 @@ Multiplexer -r- Firmware : serial
 actor  Bowler
 Bowler -u- Console
 ```
+
+* The _Pinsetter_ controls the lane's pinsetter – a machine that automatically sets bowling pins back in their original positions, returns bowling balls to the front of the alley, and clears fallen pins from the pin deck.  The Pinsetter firmware communicates over serial cable with a text-based protocol.
+* The _Console_ is a graphical user interface with which the players' enter their names, start the game, and see the current scoreboard and next player to bowl.
+* The _Controller_ runs the game logic.  It keeps track of the players' turns and their scores.  It controls the _Pinsetter_ and updates the _Console_ as the game progresses.  It has a single input and output stream, and relies on the _Multiplexer_ to route messages to/from the other components.
+* The _Multiplexer_ routes messages between the _Controller_, _Console_ and _Pinsetter_.
 
 In this workshop we are going to write the _Controller_.
 
@@ -88,37 +88,45 @@ end
 
 ### ABNF Grammar
 
-```
-Inputs = 
-    "PLAYER" space score_line
-  | "NEXT" space player_index
-  | "WINNER" space player_index_list
+```plantuml
+@startebnf
+Outputs = "START", space, player_count, endl;
 
-Outputs = "START" space player_count
+player_count = ? [1-9][0-9]* ?;
 
-score_line = frame_scores? score
+Inputs = player_score_lines, next_action;
 
-frame_scores = frame_score | frame_score space frame_scores
+player_score_lines = player_score_line, {player_score_line};
+player_score_line = "PLAYER", space, score_line endl;
 
-frame_score = rolls "," score?
+score_line = frame_scores, score;
 
-rolls = numeric_rolls | symbolic_spare | symbolic_strike
+frame_scores = [frame_score, {space, frame_score}];
 
-numeric_rolls = score? "," score?
+frame_score = rolls, ",", [score];
 
-symbolic_spare = score "," "/"
+rolls = numeric_rolls | symbolic_spare | symbolic_strike;
 
-symbolic_strike = "X" "," | "," "X"
+numeric_rolls = [score], ",", [score];
 
-player_count = /[1-9][0-9]*/
+symbolic_spare = score, ",", "/";
 
-player_index_list = player_index | player_index space player_index_list
+symbolic_strike = "X", "," | ",", "X";
 
-player_index = /[0-9]+/
+next_action =
+  | "NEXT", space, player_index, endl
+  | "WINNER", space, player_index_list, endl;
 
-score = /[0-9]+/
+player_index_list = player_index, {space, player_index};
 
-space = " "
+player_index = ? [0-9]+ ?;
+
+score =  ? [0-9]+ ?;
+
+space = " " (* space character *); 
+endl = "\n" (* newline character *); 
+
+@endebnf
 ```
 ### Pinsetter protocol
 
@@ -129,44 +137,46 @@ skinparam lifelineStrategy solid
 participant Peer
 participant Pinsetter
 
-
-Peer -> Pinsetter : RESET
-note right : Handshake to (re)sync state of peer & hardware
-note over Peer : Peer ignores all messages \nuntil it receives READY 
-Pinsetter -> Peer : READY
-
-loop
-    Pinsetter -> Peer : PINFALL <n>
-    note right : Report pins knocked down by roll
-    alt
-        Pinsetter <- Peer : SET PARTIAL
-        activate Pinsetter
-        note right : Clear the lane of fallen pins\nSet pins that were standing for next roll
-        deactivate Pinsetter
-    else
-        Pinsetter <- Peer : SET FULL 
-        activate Pinsetter
-        note right : Clear the lane of fallen pins\nSet all pins for next roll
-        deactivate Pinsetter
+loop for each game 
+    Peer -> Pinsetter : RESET
+    note right : Handshake to (re)sync state of peer & hardware
+    note over Peer : Peer ignores all messages \nuntil it receives READY 
+    Pinsetter -> Peer : READY
+    note right : All pins standing, ready for first roll
+    loop
+        Pinsetter -> Peer : PINFALL <n>
+        note right : Report pins knocked down by roll
+        alt continue frame
+            Pinsetter <- Peer : SET PARTIAL
+            note right : Clear the lane of fallen pins\nSet pins that were standing for next roll
+        else end of frame or bonus roll of 10 after final strike, continue game
+            Pinsetter <- Peer : SET FULL 
+            note right : Clear the lane of fallen pins\nSet all pins for next roll
+        else end of game
+            note over Peer : no message to Pinsetter
+        end
     end
 end
 ```
 
 ### ABNF Grammar
 
-```
-Inputs = 
-    "RESET"
-  | "SET space "PARTIAL"
-  | "SET" space "FULL"
+```plantuml
+@startebnf
+Input = 
+    "RESET", endl
+  | "SET", space, "PARTIAL", endl
+  | "SET", space, "FULL", endl;
 
-Outputs = 
-    "READY"
-  | "PINFALL" pin_count
+Output = 
+    "READY", endl
+  | "PINFALL", space, pin_count, endl;
 
-pin_count = /[1-9][0-9]*/
+pin_count = ? [1-9][0-9]* ?;
 
-space = " "
+space = " " (* space character *); 
+endl = "\n" (* newline character *); 
+@endebnf
 ```
 
 
@@ -207,8 +217,10 @@ loop until end of game
     
     alt continue frame
         Controller -> Multiplexer : SET PARTIAL
-    else end of frame
+    else end of frame or bonus roll of 10 after final strike, continue game
         Controller -> Multiplexer : SET FULL
+    else end of game
+        note over Controller : no message to Pinsetter via Multiplexer
     end
     
     |||
