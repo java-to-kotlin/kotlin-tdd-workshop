@@ -147,6 +147,19 @@ class StartNextGameTest {
         StartOfGame,
         StartOfGame
     )
+    val playerCount = newGame.playerCount()
+    
+    @Test
+    fun `does not set pins after end of game`() {
+        val lastRoll = (1 until newGame.playerCount())
+            .fold(startOfLastFrame()) { turn, _ -> turn.roll(1).roll(2) }
+            .roll(1)
+        
+        val (newState, command) = lastRoll.eval(Pinfall(2))
+        assertTrue(newState is GameInProgress)
+        assertTrue(newState.gameIsOver())
+        assertTrue(command == null)
+    }
     
     @Test
     fun `start new game after end of previous game`() {
@@ -167,15 +180,16 @@ class StartNextGameTest {
     private fun startOfLastFrame(): GameInProgress {
         return (1..9)
             .fold(newGame) { game, _ ->
-                (1..newGame.playerCount())
+                (1..playerCount)
                     .fold(game) { turn, _ -> turn.roll(1).roll(1) }
             }
             .also { assertTrue(it.nextPlayerToBowl() == 0) }
     }
     
-    private fun afterLastFrame(): GameInProgress = (1..newGame.playerCount())
-        .fold(startOfLastFrame()) { turn, _ -> turn.roll(1).roll(2) }
-        .also { assertTrue(it.gameIsOver()) }
+    private fun afterLastFrame(): GameInProgress =
+        (1..newGame.playerCount())
+            .fold(startOfLastFrame()) { turn, _ -> turn.roll(1).roll(2) }
+            .also { assertTrue(it.gameIsOver()) }
 }
 
 private fun GameInProgress.playerCount() = playerGames.size

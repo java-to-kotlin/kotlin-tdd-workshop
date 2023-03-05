@@ -92,7 +92,11 @@ internal fun LaneState.eval(inputMessage: ControllerInput): Step = when (inputMe
                 val newState = roll(inputMessage.pinfall)
                 Step(
                     newState = newState,
-                    command = if (newState.playerGames[player].needsAllPinsSet()) SetFull else SetPartial
+                    command = when {
+                        newState.gameIsOver() -> null
+                        newState.playerGames[player].needsAllPinsSet() -> SetFull
+                        else -> SetPartial
+                    }
                 )
             }
         }
