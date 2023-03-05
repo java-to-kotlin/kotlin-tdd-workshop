@@ -21,8 +21,8 @@ actor  Bowler
 Bowler -u- Console
 ```
 
-* The _Pinsetter_ controls the lane's pinsetter – a machine that automatically sets bowling pins back in their original positions, returns bowling balls to the front of the alley, and clears fallen pins from the pin deck.  The Pinsetter firmware communicates over serial cable with a text-based protocol.
-* The _Console_ is a graphical user interface with which the players' enter their names, start the game, and see the current scoreboard and next player to bowl.
+* The _Pinsetter_ firmware controls the lane's pinsetter machine, which automatically detects fallen pins, clears fallen pins from the pin deck, sets bowling pins back in their original positions, and returns bowling balls to the front of the alley.  The Pinsetter firmware communicates over serial cable with a text-based protocol.
+* The _Console_ is a graphical user interface with which the players' enter their names, start the game, and see the current scoreboard and next player to bowl. The console also communicates with a text-based protocol.
 * The _Controller_ runs the game logic.  It keeps track of the players' turns and their scores.  It controls the _Pinsetter_ and updates the _Console_ as the game progresses.  It has a single input and output stream, and relies on the _Multiplexer_ to route messages to/from the other components.
 * The _Multiplexer_ routes messages between the _Controller_, _Console_ and _Pinsetter_.
 
