@@ -149,7 +149,7 @@ class StartNextGameTest {
     )
     
     @Test
-    fun todo() {
+    fun `start new game after end of previous game`() {
         val game = afterLastFrame()
         val newPlayerCount = 3
         
@@ -164,12 +164,18 @@ class StartNextGameTest {
         assertTrue(step2.newState == GameInProgress(StartOfGame, StartOfGame, StartOfGame))
     }
     
-    private fun afterLastFrame(): GameInProgress = (1..10)
-        .fold(newGame) { game, _ ->
-            (1..newGame.playerCount()).fold(game) { turn, _ ->
-                turn.roll(1).roll(2)
+    private fun startOfLastFrame(): GameInProgress {
+        return (1..9)
+            .fold(newGame) { game, _ ->
+                (1..newGame.playerCount())
+                    .fold(game) { turn, _ -> turn.roll(1).roll(1) }
             }
-        }.also { assertTrue(it.gameIsOver()) }
+            .also { assertTrue(it.nextPlayerToBowl() == 0) }
+    }
+    
+    private fun afterLastFrame(): GameInProgress = (1..newGame.playerCount())
+        .fold(startOfLastFrame()) { turn, _ -> turn.roll(1).roll(2) }
+        .also { assertTrue(it.gameIsOver()) }
 }
 
 private fun GameInProgress.playerCount() = playerGames.size
