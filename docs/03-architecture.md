@@ -30,7 +30,7 @@ In this workshop we are going to write the _Controller_.
 
 ## Testing the Controller locally during development
 
-We simulate the Pinsetter in software on the developer machine and communicate with the fake pinsetter over Unix pipes.
+We simulate the Pinsetter in software on the developer machine and communicate with the fake pinsetter over Unix named pipes.
 
 ```plantuml
 node MacBook {
