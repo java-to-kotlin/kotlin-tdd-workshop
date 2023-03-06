@@ -1,4 +1,4 @@
-~~# Software components
+# Software components
 
 The following software components run the games for a single bowling lane.
 
