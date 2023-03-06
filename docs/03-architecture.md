@@ -1,8 +1,13 @@
-# Architecture
+~~# Software components
 
-A set of software components run the games for a single bowling lane.
+The following software components run the games for a single bowling lane.
 
-```plantuml
+* The _Console_ is a graphical user interface with which the players' enter their names, start the game, and see the current scoreboard and next player to bowl. The console also communicates with a text-based protocol.
+* The _Pinsetter_ firmware controls the lane's pinsetter machine, which automatically detects fallen pins, clears fallen pins from the pin deck, sets bowling pins back in their original positions, and returns bowling balls to the front of the alley.  The Pinsetter firmware communicates over serial cable with a text-based protocol.
+* The _Controller_ runs the game logic.  It keeps track of the players' turns and their scores.  It controls the _Pinsetter_ and updates the _Console_ as the game progresses.  It has a single input and output stream, and relies on the _Multiplexer_ to route messages to/from the other components.
+* The _Multiplexer_ routes messages between the _Controller_, _Console_ and _Pinsetter_.
+
+```{.plantuml width=75% caption="Deployment in the field"}
 node Pinsetter {
     component Firmware
 }
@@ -21,18 +26,13 @@ actor  Bowler
 Bowler -u- Console
 ```
 
-* The _Pinsetter_ firmware controls the lane's pinsetter machine, which automatically detects fallen pins, clears fallen pins from the pin deck, sets bowling pins back in their original positions, and returns bowling balls to the front of the alley.  The Pinsetter firmware communicates over serial cable with a text-based protocol.
-* The _Console_ is a graphical user interface with which the players' enter their names, start the game, and see the current scoreboard and next player to bowl. The console also communicates with a text-based protocol.
-* The _Controller_ runs the game logic.  It keeps track of the players' turns and their scores.  It controls the _Pinsetter_ and updates the _Console_ as the game progresses.  It has a single input and output stream, and relies on the _Multiplexer_ to route messages to/from the other components.
-* The _Multiplexer_ routes messages between the _Controller_, _Console_ and _Pinsetter_.
-
 In this workshop we are going to write the _Controller_.
 
 ## Testing the Controller locally during development
 
 We simulate the Pinsetter in software on the developer machine and communicate with the fake pinsetter over Unix named pipes.
 
-```plantuml
+```{.plantuml width=75% caption="Deployment for testing the Controller"}
 node MacBook {
     component {
         component Console
@@ -52,12 +52,17 @@ You -u- Console
 You -u- FakePinsetter
 ```
 
+In the workshop/ directory there are two scripts for use when testing:
 
-## Message flows
+* `run-components` creates the named pipes and runs all the components except the Controller.  When the named pipes exist, run the Controller, reading its input from the named pipe `workshop/pipes/multiplexer-to-controller` and writing its output to the named pipe `workshop/pipes/controller-to-multiplexer`.  (To run the Controller from within the IDE, its main function will have to open the input and output named pipes for reading and writing respectively).   
+* `stdio-controller` can be used to manually explore the protocol.  It connects your terminal to the named pipes, displays messages sent by the multiplexer and lets you enter messages in the terminal to the multiplexer.  It displays the inputs and outputs in different colours so you can more easily understand the message flow.
 
-### Console protocol
 
-```plantuml
+# Communication protocols
+
+## Messages to/from the Console
+
+```{.plantuml width=100%}
 hide footbox
 skinparam lifelineStrategy solid
 
@@ -86,9 +91,7 @@ loop until end of game
 end
 ```
 
-### ABNF Grammar
-
-```plantuml
+```{.plantuml width=65%}
 @startebnf
 Outputs = "START", space, player_count, endl;
 
@@ -97,7 +100,8 @@ player_count = ? [1-9][0-9]* ?;
 Inputs = player_score_lines, next_action;
 
 player_score_lines = player_score_line, {player_score_line};
-player_score_line = "PLAYER", space, score_line endl;
+
+player_score_line = "PLAYER", space, score_line, endl;
 
 score_line = frame_scores, score;
 
@@ -107,6 +111,12 @@ frame_score = rolls, ",", [score];
 
 rolls = numeric_rolls | symbolic_spare | symbolic_strike;
 
+@endbnf
+```
+
+```{.plantuml width=65%}
+@startebnf
+
 numeric_rolls = [score], ",", [score];
 
 symbolic_spare = score, ",", "/";
@@ -114,7 +124,7 @@ symbolic_spare = score, ",", "/";
 symbolic_strike = "X", "," | ",", "X";
 
 next_action =
-  | "NEXT", space, player_index, endl
+    "NEXT", space, player_index, endl
   | "WINNER", space, player_index_list, endl;
 
 player_index_list = player_index, {space, player_index};
@@ -128,9 +138,10 @@ endl = "\n" (* newline character *);
 
 @endebnf
 ```
-### Pinsetter protocol
 
-```plantuml
+## Messages to/from the Pinsetter
+
+```{.plantuml width=100%}
 hide footbox
 skinparam lifelineStrategy solid
 
@@ -159,9 +170,7 @@ loop for each game
 end
 ```
 
-### ABNF Grammar
-
-```plantuml
+```{.plantuml width=65%}
 @startebnf
 Input = 
     "RESET", endl
@@ -184,7 +193,7 @@ endl = "\n" (* newline character *);
 
 The Controller performs the Peer side of both the Pinsetter and Console protocols and relies on the Multiplexer to route messages to/from the other components.
 
-```plantuml
+```{.plantuml width=100%}
 @startuml
 hide footbox
 skinparam lifelineStrategy solid

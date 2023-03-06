@@ -22,7 +22,7 @@ The scorecard is divided into 10 frames and each frame is divided into two boxes
 In modern bowling alleys, the scoring is automatic and the scorecard is displayed on a computer monitor.
 
 
-# Example Games
+# Example games
 
 10 strikes, 2 bonus rolls, each a strike = 10 frames * 30 points = 300
 
