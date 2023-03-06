@@ -1,10 +1,10 @@
 #!/usr/bin/env nix-shell
 #!nix-shell -i /bin/bash -p pandoc pandoc-plantuml-filter plantuml texlive.combined.scheme-context
 
-find "$(dirname "$0")/docs" -name "*.md" -print0 | \
+find "$(dirname "$0")/docs" -print0 | \
   sort -z | \
   xargs -0 -n 1 cat | \
-  pandoc --metadata title="Ten-Pin Bowling TDD Workshop" \
+  pandoc \
     --standalone \
     --pdf-engine context \
     --from markdown+grid_tables \
