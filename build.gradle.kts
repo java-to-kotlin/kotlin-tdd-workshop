@@ -1,5 +1,4 @@
 import com.bnorm.power.PowerAssertGradleExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.8.0"
@@ -12,11 +11,10 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    
-    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5")
-    
-    testImplementation("io.kotest:kotest-runner-junit5:5.5.4")
-    testImplementation("io.kotest:kotest-property:5.5.4")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
 }
 
 tasks.test {
