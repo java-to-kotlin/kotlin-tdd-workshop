@@ -1,13 +1,29 @@
 package dev.javaToKotlin
 
-class PinCount
+@JvmInline
+value class PinCount(val value: Int) {
+    init {
+        require(value in 0..10)
+    }
+
+    companion object {
+        operator fun invoke(value: Int): PinCount? =
+            when (value) {
+                in 0..10 -> PinCount(value)
+                else -> null
+            }
+    }
+}
 
 class Score
 
 class Frame
 
-class Game
+class Game(val lines: List<Line>)
 
-class Player
+typealias Player = String
 
-class Line
+class Line(
+    val player: Player,
+    val frames: List<Frame>
+)
