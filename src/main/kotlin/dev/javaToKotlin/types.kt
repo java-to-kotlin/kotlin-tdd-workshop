@@ -1,17 +1,32 @@
 package dev.javaToKotlin
 
-class Score
+import dev.javaToKotlin.PinCount.Companion.zero
+
+@JvmInline
+value class Score(val value: Int) {
+    operator fun plus(other: Score) = Score(this.value + other.value)
+    operator fun plus(other: PinCount) = Score(this.value + other.value)
+}
 
 class Game(val lines: List<Line>)
 
 typealias Player = String
 
 sealed class Frame {
-    abstract fun scorecard(): String
+    abstract fun pinsString(): String
+    open fun score(frames: List<Frame>): Score? = null
 }
 
 interface PlayableFrame {
     fun roll(pins: PinCount): Frame
+}
+
+interface HasRoll1 {
+    val roll1: PinCount
+}
+
+interface HasRoll2 {
+    val roll2: PinCount
 }
 
 class UnplayedFrame : Frame(), PlayableFrame {
@@ -21,31 +36,61 @@ class UnplayedFrame : Frame(), PlayableFrame {
             else -> InProgressFrame(pins)
         }
 
-    override fun scorecard() = " , "
+    override fun pinsString() = " , "
+    override fun score(frames: List<Frame>): Score? = null
+}
+
+class InProgressFrame(
+    override val roll1: PinCount
+) : Frame(), PlayableFrame, HasRoll1 {
+    override fun roll(pins: PinCount) = CompletedFrame(this.roll1, pins)
+    override fun pinsString() = "${roll1.scorecard()}, "
+    override fun score(frames: List<Frame>) = roll1.toScore()
+}
+
+class CompletedFrame(
+    override val roll1: PinCount,
+    override val roll2: PinCount
+) : Frame() , HasRoll1, HasRoll2 {
+    override fun pinsString() = render(roll1, roll2)
+    override fun score(frames: List<Frame>): Score {
+        val baseScore = roll1 + roll2
+        return if (roll1 + roll2 == Score(10)) {
+            val nextFrame: Frame? = frames.nextItemFrom(this)
+            if (nextFrame is HasRoll1)
+                baseScore + nextFrame.roll1
+            else
+                baseScore
+        } else
+            baseScore
+    }
 }
 
 class UnplayedFinalFrame : Frame(), PlayableFrame {
     override fun roll(pins: PinCount) = InProgressFinalFrame(pins)
-    override fun scorecard() = " , , "
+    override fun pinsString() = " , , "
+    override fun score(frames: List<Frame>): Score? = null
 }
 
-class InProgressFinalFrame(val pins: PinCount) : Frame(), PlayableFrame {
+class InProgressFinalFrame(
+    override val roll1: PinCount
+) : Frame(), PlayableFrame, HasRoll1 {
     override fun roll(pins: PinCount): Frame =
         when {
-            this.pins.value + pins.value >= 10 -> FinalBonusFrame(this.pins, pins)
-            else -> CompletedFinalFrame(this.pins, pins)
+            this.roll1.value + pins.value >= 10 -> FinalBonusFrame(this.roll1, pins)
+            else -> CompletedFinalFrame(this.roll1, pins)
         }
-
-    override fun scorecard() = "${pins.scorecard()}, , "
+    override fun pinsString() = "${roll1.scorecard()}, , "
+    override fun score(frames: List<Frame>) = roll1.toScore()
 }
 
-
 class FinalBonusFrame(
-    val roll1: PinCount,
-    val roll2: PinCount
-) : Frame(), PlayableFrame {
+    override val roll1: PinCount,
+    override val roll2: PinCount
+) : Frame(), PlayableFrame, HasRoll1, HasRoll2 {
     override fun roll(pins: PinCount) = CompletedFinalFrame(roll1, roll2, pins)
-    override fun scorecard() = render(roll1, roll2) + ", "
+    override fun pinsString() = render(roll1, roll2) + ", "
+    override fun score(frames: List<Frame>) = roll1 + roll2
 }
 
 fun render(roll1: PinCount, roll2: PinCount) =
@@ -55,29 +100,34 @@ fun render(roll1: PinCount, roll2: PinCount) =
         else -> "${roll1.scorecard()},${roll2.scorecard()}"
     }
 
-class InProgressFrame(val pins: PinCount) : Frame(), PlayableFrame {
-    override fun roll(pins: PinCount) = CompletedFrame(this.pins, pins)
-    override fun scorecard() = "${pins.scorecard()}, "
-}
-
 class CompletedFinalFrame(
-    val roll1: PinCount,
-    val roll2: PinCount,
+    override val roll1: PinCount,
+    override val roll2: PinCount,
     val roll3: PinCount? = null
-) : Frame() {
-    override fun scorecard() = render(roll1, roll2) + "," +
+) : Frame(), HasRoll1, HasRoll2 {
+    override fun pinsString() = render(roll1, roll2) + "," +
             (roll3?.scorecard() ?: " ")
+    override fun score(frames: List<Frame>) = roll1 + roll2 + (roll3 ?: zero)
 }
 
-class CompletedFrame(
-    val roll1: PinCount,
-    val roll2: PinCount
-) : Frame() {
-    override fun scorecard() = render(roll1, roll2)
-}
 
-class Strike : Frame() {
-    override fun scorecard() = " ,X"
+class Strike : Frame(), HasRoll1 {
+    override val roll1 = PinCount(10)!!
+    override fun pinsString() = " ,X"
+    override fun score(frames: List<Frame>): Score {
+        val nextFrame: Frame? = frames.nextItemFrom(this)
+        val nextNextFrame: Frame? = nextFrame?.let { frames.nextItemFrom(it) }
+        val nextRoll = when {
+            nextFrame is HasRoll1 -> nextFrame.roll1
+            else -> zero
+        }
+        val nextNextRoll = when {
+            nextFrame is HasRoll2 -> nextFrame.roll2
+            nextNextFrame is HasRoll1 -> nextNextFrame.roll1
+            else -> zero
+        }
+        return roll1 + nextRoll + nextNextRoll
+    }
 }
 
 fun lineFor(
@@ -97,7 +147,21 @@ sealed class Line(
     val frames: List<Frame>
 ) {
     fun scorecard(): String =
-        (listOf(player) + frames.map { it.scorecard() }).joinToString("|")
+        (listOf(player) + framesStrings()).joinToString("|")
+
+    private fun framesStrings(): ArrayList<String> {
+        val destination = ArrayList<String>(frames.size)
+        var score = Score(0)
+        for (item in frames) {
+            val frameScore = item.score(frames)
+            score = score + (item.score(frames)?: Score(0))
+            val scoreString = if (frameScore == null) " " else score.value
+            destination.add(
+                item.pinsString() + "," + scoreString
+            )
+        }
+        return destination
+    }
 }
 
 class PlayableLine(
@@ -134,3 +198,8 @@ private fun <T> List<T>.replace(replace: T, with: T): List<T> =
     toMutableList().apply {
         this[indexOf(replace)] = with
     }.toList()
+
+private fun <T> List<T>.nextItemFrom(item: T): T? {
+    val index = indexOf(item)
+    return if (index == -1 || index == size - 1) null else this[index + 1]
+}
