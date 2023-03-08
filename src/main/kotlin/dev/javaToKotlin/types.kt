@@ -14,11 +14,6 @@ interface PlayableFrame {
     fun roll(pins: PinCount): Frame
 }
 
-fun PinCount.scorecard() = when (this.value) {
-    10 -> "X"
-    else -> this.value.toString()
-}
-
 class UnplayedFrame : Frame(), PlayableFrame {
     override fun roll(pins: PinCount): Frame =
         when (pins.value) {
@@ -40,6 +35,7 @@ class InProgressFinalFrame(val pins: PinCount) : Frame(), PlayableFrame {
             this.pins.value + pins.value >= 10 -> FinalBonusFrame(this.pins, pins)
             else -> CompletedFinalFrame(this.pins, pins)
         }
+
     override fun scorecard() = "${pins.scorecard()}, , "
 }
 
@@ -112,10 +108,10 @@ class PlayableLine(
         val currentFrame = frames.first { it is PlayableFrame }
         if (currentFrame !is PlayableFrame)
             error("Unexpectedly unplayable frame")
-        val newFrame = currentFrame.roll(pinCount)
-        val newFrames = frames.toMutableList().apply {
-            this[this.indexOf(currentFrame)] = newFrame
-        }.toList()
+        val newFrames = frames.replace(
+            currentFrame,
+            currentFrame.roll(pinCount)
+        )
         return if (newFrames.last() is PlayableFrame)
             PlayableLine(player, newFrames)
         else
@@ -127,3 +123,14 @@ class CompletedLine(
     player: Player,
     frames: List<Frame>
 ) : Line(player, frames)
+
+
+private fun PinCount.scorecard() = when (this.value) {
+    10 -> "X"
+    else -> this.value.toString()
+}
+
+private fun <T> List<T>.replace(replace: T, with: T): List<T> =
+    toMutableList().apply {
+        this[indexOf(replace)] = with
+    }.toList()
