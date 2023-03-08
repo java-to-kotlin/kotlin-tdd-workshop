@@ -1,27 +1,5 @@
 package dev.javaToKotlin
 
-@JvmInline
-value class PinCount private constructor(val value: Int) {
-    init {
-        require(value in 0..10)
-    }
-
-    companion object {
-        operator fun invoke(value: Int): PinCount? =
-            when (value) {
-                in 0..10 -> PinCount(value)
-                else -> null
-            }
-    }
-
-    override fun toString() = value.toString()
-
-    fun scorecard() = when (value) {
-        10 -> "X"
-        else -> value.toString()
-    }
-}
-
 class Score
 
 class Game(val lines: List<Line>)
@@ -34,6 +12,11 @@ sealed class Frame {
 
 interface PlayableFrame {
     fun roll(pins: PinCount): Frame
+}
+
+fun PinCount.scorecard() = when (this.value) {
+    10 -> "X"
+    else -> this.value.toString()
 }
 
 class UnplayedFrame : Frame(), PlayableFrame {
@@ -66,11 +49,15 @@ class FinalBonusFrame(
     val roll2: PinCount
 ) : Frame(), PlayableFrame {
     override fun roll(pins: PinCount) = CompletedFinalFrame(roll1, roll2, pins)
-    override fun scorecard() = maybeSpare(roll1, roll2) + ", "
+    override fun scorecard() = render(roll1, roll2) + ", "
 }
 
-fun maybeSpare(roll1: PinCount, roll2: PinCount) = "${roll1.scorecard()}," +
-        (if (roll1.value != 10 && roll1.value + roll2.value == 10) "/" else roll2.scorecard())
+fun render(roll1: PinCount, roll2: PinCount) =
+    when {
+        roll1.value == 10 -> "${roll1.scorecard()},${roll2.scorecard()}"
+        roll1.value + roll2.value == 10 -> "${roll1.scorecard()},/"
+        else -> "${roll1.scorecard()},${roll2.scorecard()}"
+    }
 
 class InProgressFrame(val pins: PinCount) : Frame(), PlayableFrame {
     override fun roll(pins: PinCount) = CompletedFrame(this.pins, pins)
@@ -82,7 +69,7 @@ class CompletedFinalFrame(
     val roll2: PinCount,
     val roll3: PinCount? = null
 ) : Frame() {
-    override fun scorecard() = maybeSpare(roll1, roll2) + "," +
+    override fun scorecard() = render(roll1, roll2) + "," +
             (roll3?.scorecard() ?: " ")
 }
 
@@ -90,7 +77,7 @@ class CompletedFrame(
     val roll1: PinCount,
     val roll2: PinCount
 ) : Frame() {
-    override fun scorecard() = maybeSpare(roll1, roll2)
+    override fun scorecard() = render(roll1, roll2)
 }
 
 class Strike : Frame() {
@@ -114,7 +101,7 @@ sealed class Line(
     val frames: List<Frame>
 ) {
     fun scorecard(): String =
-        (listOf("$player") + frames.map { it.scorecard() }).joinToString("|")
+        (listOf(player) + frames.map { it.scorecard() }).joinToString("|")
 }
 
 class PlayableLine(

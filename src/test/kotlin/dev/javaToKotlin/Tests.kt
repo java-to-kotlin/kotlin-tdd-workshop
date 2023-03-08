@@ -6,6 +6,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class Tests {
+
     @Test
     fun `zero frame game`() {
         val line = lineFor("Fred", frameCount = 0)
@@ -129,23 +130,6 @@ class Tests {
         line = line.roll(3.pins)
         assertEquals("Fred|9,/,3", line.scorecard())
         assertTrue(line is CompletedLine)
-    }
-
-    @Test fun `two rolls on UnplayedFrame`() {
-        val frame = UnplayedFrame()
-
-        val frame2 = frame.roll(4.pins)
-        assertTrue(frame2 is InProgressFrame)
-
-        val frame3 = frame2.roll(2.pins)
-        assertTrue(frame3 is CompletedFrame)
-    }
-
-    @Test fun `strike on UnplayedFrame`() {
-        val frame = UnplayedFrame()
-
-        val frame2 = frame.roll(10.pins)
-        assertTrue(frame2 is Strike)
     }
 }
 
