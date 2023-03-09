@@ -33,6 +33,9 @@ private fun List<FrameScore>.frameScoreLine(name: String): String =
         joinToString(separator = " | ", prefix = "| ", postfix = " |",
             transform = FrameScore::toScoreDisplay)
 
+private val dividerLine =
+    "+" + "-".repeat(maxPlayerNameLen+1) + "+" + "-----+".repeat(10)
+
 private fun FrameScore.toScoreDisplay(): String {
     val r1 = roll1
     val r2 = roll2
