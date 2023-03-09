@@ -32,13 +32,13 @@ data class ResettingPinsetter(val playerCount: Int) : LaneState
 data class GameInProgress(val playerGames: List<Frame>) : LaneState
 
 
-private fun LaneState.toViewState(): ViewState? = when (this) {
+fun LaneState.toViewState(): ViewState? = when (this) {
     Initialising -> null
     is ResettingPinsetter -> null
     is GameInProgress -> toViewState()
 }
 
-private fun GameInProgress.toViewState(): ViewState {
+fun GameInProgress.toViewState(): ViewState {
     val playerScores = scores()
     
     return if (gameIsOver()) {
@@ -78,7 +78,7 @@ internal fun LaneState.eval(inputMessage: ControllerInput): Step = when (inputMe
     
     PinsetterReady -> when (this) {
         is ResettingPinsetter ->
-            Step(newState = GameInProgress(playerGames = (1..playerCount).map { StartOfGame }))
+            Step(newState = newGame(playerCount))
         
         else -> ignoreInput()
     }
@@ -101,6 +101,9 @@ internal fun LaneState.eval(inputMessage: ControllerInput): Step = when (inputMe
             }
         }
 }
+
+fun newGame(playerCount: Int) =
+    GameInProgress(playerGames = (1..playerCount).map { StartOfGame })
 
 fun Frame.needsAllPinsSet() = when (this) {
     is CompleteFrame, is GameOver -> true

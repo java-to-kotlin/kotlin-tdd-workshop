@@ -16,7 +16,7 @@ data class GameOverViewState(
 ) : ViewState
 
 
-internal fun ViewState.toLines(): List<String> = scoreLines() + when(this) {
+fun ViewState.toLines(): List<String> = scoreLines() + when(this) {
     is GameInProgressViewState -> "NEXT $nextPlayerToBowl"
     is GameOverViewState -> "WINNER ${winners.joinToString(" ")}"
 }
