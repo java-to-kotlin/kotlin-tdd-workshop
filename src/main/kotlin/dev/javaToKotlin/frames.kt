@@ -1,6 +1,7 @@
 package dev.javaToKotlin
 
 open class Frame
+
 class UnplayedFrame : Frame(), PlayableFrame {
     override fun roll(pinCount: PinCount): Frame = InProgressFrame(pinCount)
 }
@@ -13,7 +14,7 @@ class InProgressFrame(
 
 class CompletedFrame(
     val roll1: PinCount,
-    val roll: PinCount
+    val roll2: PinCount
 ) : Frame() {
 
 }

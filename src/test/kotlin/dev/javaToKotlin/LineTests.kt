@@ -39,6 +39,24 @@ class LineTests {
     }
 
     @Test
+    fun `four rolls makes a two frame line not playable`() {
+        var line = Line("Fred", NonNegativeInt(2))
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(3.pins)
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(4.pins)
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(5.pins)
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(6.pins)
+        assertFalse(line is PlayableLine)
+    }
+
+    @Test
     fun `two rolls make an unplayed frame not playable`() {
         var frame: Frame = UnplayedFrame()
         assertTrue(frame is PlayableFrame)
