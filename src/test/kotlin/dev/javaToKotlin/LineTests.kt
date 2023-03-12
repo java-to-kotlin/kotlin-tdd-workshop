@@ -19,23 +19,35 @@ class LineTests {
 
     @Test
     fun `a single roll on a one frame line is playable`() {
-        val line = Line("Fred", NonNegativeInt(1))
+        var line = Line("Fred", NonNegativeInt(1))
         assertTrue(line is PlayableLine)
 
-        val line2 = line.roll(3.pins)
-        assertTrue(line2 is PlayableLine)
+        line = line.roll(3.pins)
+        assertTrue(line is PlayableLine)
     }
 
     @Test
     fun `two rolls makes a one frame line not playable`() {
-        val line = Line("Fred", NonNegativeInt(1))
+        var line = Line("Fred", NonNegativeInt(1))
         assertTrue(line is PlayableLine)
 
-        val line2 = line.roll(3.pins)
-        assertTrue(line2 is PlayableLine)
+        line = line.roll(3.pins)
+        assertTrue(line is PlayableLine)
 
-        val line3 = line.roll(4.pins)
-        assertFalse(line3 is PlayableLine)
+        line = line.roll(4.pins)
+        assertFalse(line is PlayableLine)
+    }
+
+    @Test
+    fun `two rolls make an unplayed frame not playable`() {
+        var frame: Frame = UnplayedFrame()
+        assertTrue(frame is PlayableFrame)
+
+        frame = frame.roll(3.pins)
+        assertTrue(frame is PlayableFrame)
+
+        frame = frame.roll(3.pins)
+        assertFalse(frame is PlayableFrame)
     }
 }
 
