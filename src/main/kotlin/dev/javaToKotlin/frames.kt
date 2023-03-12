@@ -14,7 +14,7 @@ class UnplayedFinalFrame : Frame(), PlayableFrame {
     override fun roll(pinCount: PinCount): Frame =
         when (pinCount.value) {
             10 -> FinalFrameStrike()
-            else -> InProgressFrame(pinCount)
+            else -> InProgressFinalFrame(pinCount)
         }
 }
 
@@ -23,6 +23,14 @@ class Strike : Frame()
 class FinalFrameStrike : Frame(), PlayableFrame {
     override fun roll(pinCount: PinCount): Frame =
         FinalBonusFrame(PinCount(10)!!, pinCount)
+}
+
+class InProgressFinalFrame(val roll1: PinCount) : Frame(), PlayableFrame {
+    override fun roll(pinCount: PinCount): Frame =
+        when {
+            roll1.value + pinCount.value == 10 -> FinalBonusFrame(roll1, pinCount)
+            else -> CompletedFinalFrame(roll1, pinCount, null)
+        }
 }
 
 class FinalBonusFrame(
@@ -36,7 +44,7 @@ class FinalBonusFrame(
 class CompletedFinalFrame(
     val roll1: PinCount,
     val roll2: PinCount,
-    val roll3: PinCount
+    val roll3: PinCount?
 ) : Frame() {
 
 }

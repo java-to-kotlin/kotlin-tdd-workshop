@@ -62,7 +62,6 @@ class LineTests {
         assertFalse(line is PlayableLine)
     }
 
-
     @Test
     fun `a strike in the final frame gives two extra rolls`() {
         var line = Line("Fred", 1.frames)
@@ -76,7 +75,21 @@ class LineTests {
 
         line = line.roll(4.pins)
         assertFalse(line is PlayableLine)
+    }
 
+    @Test
+    fun `a spare in the final frame gives an extra roll`() {
+        var line = Line("Fred", 1.frames)
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(9.pins)
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(1.pins)
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(4.pins)
+        assertFalse(line is PlayableLine)
     }
 }
 
