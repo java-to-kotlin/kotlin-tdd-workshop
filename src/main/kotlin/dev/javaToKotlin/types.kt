@@ -33,7 +33,7 @@ class PlayableLine(
     player: Player,
     frames: List<Frame>
 ) : Line(player, frames) {
-    fun roll(pinCount: PinCount): Line = TODO()
+    fun roll(pinCount: PinCount): Line = this
 }
 
 open class Frame
@@ -51,13 +51,4 @@ value class NonNegativeInt(val value: Int) {
 
 operator fun NonNegativeInt.plus(score: NonNegativeInt): NonNegativeInt = TODO()
 operator fun NonNegativeInt.plus(pinCount: PinCount): NonNegativeInt = TODO()
-
-@JvmInline
-value class PinCount(val value: Int) {
-    init {
-        require(value in 0..10)
-    }
-
-    operator fun plus(that: PinCount): PinCount = TODO()
-}
 
