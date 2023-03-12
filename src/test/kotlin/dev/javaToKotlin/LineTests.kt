@@ -18,16 +18,7 @@ class LineTests {
     }
 
     @Test
-    fun `a single roll on a one frame line is playable`() {
-        var line = Line("Fred", NonNegativeInt(1))
-        assertTrue(line is PlayableLine)
-
-        line = line.roll(3.pins)
-        assertTrue(line is PlayableLine)
-    }
-
-    @Test
-    fun `two rolls makes a one frame line not playable`() {
+    fun `two rolls completes a one frame line`() {
         var line = Line("Fred", NonNegativeInt(1))
         assertTrue(line is PlayableLine)
 
@@ -39,7 +30,7 @@ class LineTests {
     }
 
     @Test
-    fun `four rolls makes a two frame line not playable`() {
+    fun `four rolls completes a two frame line`() {
         var line = Line("Fred", NonNegativeInt(2))
         assertTrue(line is PlayableLine)
 
@@ -57,15 +48,18 @@ class LineTests {
     }
 
     @Test
-    fun `two rolls make an unplayed frame not playable`() {
-        var frame: Frame = UnplayedFrame()
-        assertTrue(frame is PlayableFrame)
+    fun `a strike and two rolls completes a two frame line`() {
+        var line = Line("Fred", NonNegativeInt(2))
+        assertTrue(line is PlayableLine)
 
-        frame = frame.roll(3.pins)
-        assertTrue(frame is PlayableFrame)
+        line = line.roll(10.pins)
+        assertTrue(line is PlayableLine)
 
-        frame = frame.roll(3.pins)
-        assertFalse(frame is PlayableFrame)
+        line = line.roll(5.pins)
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(6.pins)
+        assertFalse(line is PlayableLine)
     }
 }
 
