@@ -10,7 +10,10 @@ open class Line protected constructor(
             frameCount: NonNegativeInt
         ): Line = when {
             frameCount.value == 0 -> Line(player, emptyList())
-            else -> PlayableLine(player, List(frameCount.value) { UnplayedFrame() })
+            else -> PlayableLine(
+                player,
+                List(frameCount.value - 1) { UnplayedFrame() } + UnplayedFinalFrame()
+            )
         }
     }
 }
