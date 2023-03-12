@@ -1,4 +1,4 @@
-@file:Suppress("unused", "UNUSED_PARAMETER")
+@file:Suppress("unused", "UNUSED_PARAMETER", "TODO")
 
 package dev.javaToKotlin
 
@@ -14,10 +14,20 @@ class PlayableGame: Game() {
     fun roll(pinCount: PinCount): Game = TODO()
 }
 
-open class Line(
+open class Line protected constructor(
     val player: Player,
     val frames: List<Frame>
-)
+) {
+    companion object {
+        operator fun invoke(
+            player: Player,
+            frameCount: NonNegativeInt
+        ): Line = when {
+            frameCount.value == 0 -> Line(player, emptyList())
+            else -> PlayableLine(player, emptyList())
+        }
+    }
+}
 
 class PlayableLine(
     player: Player,
@@ -33,13 +43,14 @@ class PlayableFrame : Frame() {
 }
 
 @JvmInline
-value class Score(val value: Int) {
+value class NonNegativeInt(val value: Int) {
     init {
-        require(value in 0..300)
+        require(value >= 0)
     }
-    operator fun plus(pinCount: PinCount): Score = TODO()
-    operator fun plus(score: Score): Score = TODO()
 }
+
+operator fun NonNegativeInt.plus(score: NonNegativeInt): NonNegativeInt = TODO()
+operator fun NonNegativeInt.plus(pinCount: PinCount): NonNegativeInt = TODO()
 
 @JvmInline
 value class PinCount(val value: Int) {
