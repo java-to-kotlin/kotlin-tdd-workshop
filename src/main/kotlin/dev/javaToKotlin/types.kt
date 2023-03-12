@@ -1,15 +1,52 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "UNUSED_PARAMETER")
 
 package dev.javaToKotlin
 
-class Player
+typealias Player = String
 
-class Game
+open class Game(
+    val lines: List<Line>
+) {
+    constructor() : this(emptyList())
+}
 
-class Frame
+class PlayableGame: Game() {
+    fun roll(pinCount: PinCount): Game = TODO()
+}
 
-class Score
+open class Line(
+    val player: Player,
+    val frames: List<Frame>
+)
 
-class PinCount
+class PlayableLine(
+    player: Player,
+    frames: List<Frame>
+) : Line(player, frames) {
+    fun roll(pinCount: PinCount): Line = TODO()
+}
 
-class Line
+open class Frame
+
+class PlayableFrame : Frame() {
+    fun roll(pinCount: PinCount): Frame = TODO()
+}
+
+@JvmInline
+value class Score(val value: Int) {
+    init {
+        require(value in 0..300)
+    }
+    operator fun plus(pinCount: PinCount): Score = TODO()
+    operator fun plus(score: Score): Score = TODO()
+}
+
+@JvmInline
+value class PinCount(val value: Int) {
+    init {
+        require(value in 0..10)
+    }
+
+    operator fun plus(that: PinCount): PinCount = TODO()
+}
+
