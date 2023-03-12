@@ -1,6 +1,8 @@
+import com.bnorm.power.PowerAssertGradleExtension
 
 plugins {
     kotlin("jvm") version "1.8.10"
+    id("com.bnorm.power.kotlin-power-assert") version "0.12.0"
 }
 
 repositories {
@@ -21,6 +23,14 @@ tasks.test {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(19))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
+}
+
+configure<PowerAssertGradleExtension> {
+    functions = listOf(
+        "kotlin.test.assertTrue",
+        "kotlin.test.assertFalse",
+        "kotlin.test.assertEquals"
+    )
 }
