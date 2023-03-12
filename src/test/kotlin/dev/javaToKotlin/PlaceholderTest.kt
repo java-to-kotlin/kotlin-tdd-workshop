@@ -6,6 +6,9 @@ import kotlin.test.assertEquals
 class PlaceholderTest {
     @Test
     fun placeHolder() {
-        assertEquals("banana", "banana")
+        assertEquals(
+            "beer",
+            holdMy("beer").get()
+        )
     }
 }
