@@ -10,12 +10,16 @@ value class PinCount(val value: Int){
 }
 class Score
 typealias Player = String
-data class Line(
+open class Line(
     val player: Player,
     val frames: List<Frame>
 )
 typealias Game = List<Line>
 
+class PlayableLine(player: Player, frames: List<Frame>)
+    : Line(player, frames) {
+    
+}
 
 
 class Strike
