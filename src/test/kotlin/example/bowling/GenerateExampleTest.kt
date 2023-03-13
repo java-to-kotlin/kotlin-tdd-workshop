@@ -18,9 +18,10 @@ class GenerateExampleTest {
 }
 
 fun ViewState.toTextScorecard(): List<String> =
-    this.playerScores.flatMapIndexed { i, s: List<FrameScore> ->
-        s.toTextScoreboardLines(playerNames[i])
-    }
+    listOf(dividerLine) +
+        this.playerScores.flatMapIndexed { i, s: List<FrameScore> ->
+            s.toTextScoreboardLines(playerNames[i]) + dividerLine
+        }
 
 private val playerNames = listOf("Alice", "Bob", "Carol", "Dave", "Eve")
 private val maxPlayerNameLen = playerNames.maxOf { it.length }
@@ -29,12 +30,14 @@ private fun List<FrameScore>.toTextScoreboardLines(name: String): List<String> =
     listOf(this.frameScoreLine(name), this.runningTotalLine())
 
 private fun List<FrameScore>.frameScoreLine(name: String): String =
-    name.padEnd(maxPlayerNameLen + 1, ' ') +
-        joinToString(separator = " | ", prefix = "| ", postfix = " |",
-            transform = FrameScore::toScoreDisplay)
+    "| " + name.padEnd(maxPlayerNameLen + 1, ' ') +
+        joinToString(
+            separator = " | ", prefix = "| ", postfix = " |",
+            transform = FrameScore::toScoreDisplay
+        )
 
 private val dividerLine =
-    "+" + "-".repeat(maxPlayerNameLen+1) + "+" + "-----+".repeat(10)
+    "+" + "-".repeat(maxPlayerNameLen + 2) + "+" + "-----+".repeat(10)
 
 private fun FrameScore.toScoreDisplay(): String {
     val r1 = roll1
@@ -50,14 +53,14 @@ private fun FrameScore.toScoreDisplay(): String {
 }
 
 private fun List<FrameScore>.runningTotalLine(): String =
-    total.toString().padStart(maxPlayerNameLen, ' ') + " " +
+    "| " + total.toString().padStart(maxPlayerNameLen, ' ') + " " +
         joinToString(separator = " | ", prefix = "| ", postfix = " |") {
             it.runningTotal.toString().padCentered(3)
         }
 
 private fun String.padCentered(toLen: Int): String {
     val space = (toLen - length) / 2
-    return " ".repeat(space + (length+1) % 2) + this + " ".repeat(space)
+    return " ".repeat(space + (length + 1) % 2) + this + " ".repeat(space)
 }
 
 private fun Int?.toRollDisplay(): String =
