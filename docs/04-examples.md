@@ -1,5 +1,26 @@
 # Example games
 
+An in-progress game with two players:
+
+```
++-------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+| Alice | 3 6 |   X | - 8 | 4 3 | 2 4 | 7 1 | 5 - |     |     |     |
+|    61 |  9  |  27 |  35 |  42 |  48 |  56 |  61 |     |     |     |
++-------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+| Bob   | 8 - | 6 1 |   X | 4 - | 8 / | 3 6 | 7 - |     |     |     |
+|    62 |  8  |  15 |  29 |  33 |  46 |  55 |  62 |     |     |     |
++-------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+```
+
+... and how the Controller sends the scores to the Console:
+
+```
+PLAYER 3,6,9 10,,27 0,8,35 4,3,42 2,4,48 7,1,56 5,0,61 61
+PLAYER 8,0,8 6,1,15 10,,29 4,0,33 8,2,46 3,6,55 7,0,62 62
+NEXT 0
+```
+
+
 A completed game with two players
 
 ```
@@ -12,7 +33,7 @@ A completed game with two players
 +------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
 ```
 
-And how the Controller sends the scores to the Console:
+... and how the Controller sends the scores to the Console:
 
 ```
 PLAYER 7,0,7 6,4,27 10,,47 8,2,67 10,,86 4,5,95 7,3,115 10,,135 6,4,145 0,2,147 147
