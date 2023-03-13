@@ -56,7 +56,20 @@ open class Line protected constructor(
 
 class CompletedLine(player: Player, frames: List<Frame>) : Line(player, frames)
 
-typealias Game = List<Line>
+interface Game {
+    val lines : List<Line>
+}
+
+class InProgressGame(override val lines: List<Line>) : Game {
+    fun roll(pinCount: PinCount) : Game {
+        return this
+    }
+    
+}
+
+fun newGame(players: List<String>, numberOfFrames: Int = 10): InProgressGame {
+    return InProgressGame(players.map {player -> Line(player, numberOfFrames)})
+}
 
 class PlayableLine(player: Player, frames: List<Frame>) : Line(player, frames) {
     fun roll(pinCount: PinCount): Line {
