@@ -9,7 +9,10 @@ interface PlayableFrame : Frame {
 
 class UnplayedFrame : PlayableFrame {
     override fun roll(pinCount: PinCount): Frame {
-        return InProgressFrame()
+        return when(pinCount){
+            PinCount(10) -> Strike()
+            else -> InProgressFrame()
+        }
     }
 }
 
@@ -21,20 +24,23 @@ class InProgressFrame : PlayableFrame {
 
 class OpenFrame : Frame
 
+class Strike : Frame
+
 @JvmInline
 value class PinCount(val value: Int) {
     init {
         require(value in 0..10)
     }
 }
-
 class Score
+
 typealias Player = String
 
 open class Line protected constructor(
     val player: Player,
     val frames: List<Frame>
 ) {
+
     companion object {
         operator fun invoke(
             player: Player,
@@ -67,13 +73,11 @@ class PlayableLine(player: Player, frames: List<Frame>) : Line(player, frames) {
     }
 }
 
+
 fun <T> List<T>.replacing(item: T, newItem: T): List<T> = this.map {
     if (it === item) newItem
     else it
 }
-
-
-class Strike
 class Spare
 class Turn
 class MatchState

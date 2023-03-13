@@ -64,6 +64,18 @@ class LineTests {
         val frame3 = frame2.roll(PinCount(4))
         assertTrue(frame3 is OpenFrame)
     }
+    
+    @Test
+    fun `rolling a strike`() {
+        val frame: UnplayedFrame = UnplayedFrame()
+        
+        val frame2 = frame.roll(PinCount(10))
+        assertTrue(frame2 !is PlayableFrame)
+        assertTrue(frame2 is Strike)
+        
+    }
+    
+    
 }
 
 
