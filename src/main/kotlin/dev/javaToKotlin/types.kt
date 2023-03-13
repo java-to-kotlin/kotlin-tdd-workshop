@@ -1,12 +1,20 @@
 package dev.javaToKotlin
 
 
-class Game
 class Frame
-class PinCount
+@JvmInline
+value class PinCount(val value: Int){
+    init{
+        require(value in 0..10)
+    }
+}
 class Score
-class Player
-
+typealias Player = String
+data class Line(
+    val player: Player,
+    val frames: List<Frame>
+)
+typealias Game = List<Line>
 
 
 
