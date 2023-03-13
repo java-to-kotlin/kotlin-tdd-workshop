@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eio pipefail
 
-basedir="$(realpath -m "$(dirname "$0")")"
+basedir="$(realpath "$(dirname "$0")")"
 
 function mkpipe() {
   if [[ ! -p "$1" ]]
