@@ -5,15 +5,27 @@ import kotlin.test.Test
 
 class GenerateExampleTest {
     @Test
-    fun `generate example`() {
-        val game = Random.nextGame(2, 7)
+    fun `generate partial game`() {
+        dump(Random.nextGame(2, 7))
+    }
+    
+    @Test
+    fun `generate complete game`() {
+        dump(Random.nextGame(2))
+    }
+    
+    private fun dump(game: GameInProgress) {
         val viewState = game.toViewState()
-        
-        viewState.toLines().forEach(::println)
-        
-        println()
-        
+    
+        println("```")
         viewState.toTextScorecard().forEach(::println)
+        println("```")
+        println()
+        println("... and how the Controller sends the scores to the Console:")
+        println()
+        println("```")
+        viewState.toLines().forEach(::println)
+        println("```")
     }
 }
 
@@ -30,7 +42,7 @@ private fun List<FrameScore>.toTextScoreboardLines(name: String): List<String> =
     listOf(this.frameScoreLine(name), this.runningTotalLine())
 
 private fun List<FrameScore>.frameScoreLine(name: String): String =
-    "| " + name.padEnd(maxPlayerNameLen + 1, ' ') +
+    "|" + name.padEnd(maxPlayerNameLen, ' ') +
         joinToString(
             separator = " | ", prefix = "| ", postfix = " |",
             transform = FrameScore::toScoreDisplay
@@ -42,7 +54,7 @@ private fun emptyCells(n: Int) =
     "     |".repeat(n)
 
 private val dividerLine =
-    "+" + "-".repeat(maxPlayerNameLen + 2) + "+" + "-----+".repeat(10)
+    "+" + "-".repeat(maxPlayerNameLen) + "+" + "-----+".repeat(10)
 
 private fun FrameScore.toScoreDisplay(): String {
     val r1 = roll1
@@ -58,7 +70,7 @@ private fun FrameScore.toScoreDisplay(): String {
 }
 
 private fun List<FrameScore>.runningTotalLine(): String =
-    "| " + total.toString().padStart(maxPlayerNameLen, ' ') + " " +
+    "|" + total.toString().padStart(maxPlayerNameLen-1, ' ') + " " +
         joinToString(separator = " | ", prefix = "| ", postfix = " |") {
             it.runningTotal.toString().padCentered(3)
         } +
