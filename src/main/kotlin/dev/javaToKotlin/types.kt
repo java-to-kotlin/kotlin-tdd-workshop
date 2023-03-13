@@ -66,7 +66,6 @@ class CompletedGame(override val lines: List<Line>) : Game {
 
 data class InProgressGame(override val lines: List<Line>) : Game {
     val currentLine: PlayableLine get() {
-        // if length equal, return first one
         val linesLengths = lines.map{line ->
             val index = line.frames.indexOfFirst{it is PlayableFrame}
             if (index == -1)
@@ -78,7 +77,6 @@ data class InProgressGame(override val lines: List<Line>) : Game {
         val minLength = linesLengths.min()
         val currentLinIndex = linesLengths.indexOfFirst { it == minLength }
         return lines[currentLinIndex] as PlayableLine
-        // else find the shortest playable line list
     }
     
     fun roll(pinCount: PinCount) : Game {
@@ -114,14 +112,3 @@ fun <T> List<T>.replacing(item: T, newItem: T): List<T> = this.map {
     if (it === item) newItem
     else it
 }
-class Spare
-class Turn
-class MatchState
-class Result
-class Roll
-class PerfectGame
-class Winner
-class PlayerQueue
-class Draw
-class Bonus
-class CurrentFrame
