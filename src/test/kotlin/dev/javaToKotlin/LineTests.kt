@@ -1,7 +1,6 @@
 package dev.javaToKotlin
 
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -11,27 +10,17 @@ class LineTests {
     fun `an empty line is not playable`() {
         val line = Line(
             player = "Fred",
-            frames = emptyList()
+            noOfFrames = 0
         )
         
         assertFalse(line is PlayableLine)
     }
     
     @Test
-    fun `a non empty line is playable`() {
-        val line = Line(
-            player = "Barney",
-            frames = listOf(UnplayedFrame())
-        )
-        
-        assertTrue(line is PlayableLine)
-    }
-    
-    @Test
     fun `can roll on a playable line`() {
         var line = Line(
             player = "Barney",
-            frames = listOf(UnplayedFrame())
+            noOfFrames = 1
         )
         
         assertTrue(line is PlayableLine)
@@ -44,7 +33,29 @@ class LineTests {
     }
     
     @Test
-    fun `something about frames`() {
+    fun `two frame line`() {
+        var line = Line(
+            player = "Barney",
+            noOfFrames = 2
+        )
+        
+        assertTrue(line is PlayableLine)
+        
+        line = line.roll(PinCount(1))
+        assertTrue(line is PlayableLine)
+        
+        line = line.roll(PinCount(2))
+        assertTrue(line is PlayableLine)
+        
+        line = line.roll(PinCount(3))
+        assertTrue(line is PlayableLine)
+        
+        line = line.roll(PinCount(4))
+        assertTrue(line !is PlayableLine)
+    }
+    
+    @Test
+    fun `rolling playable frames`() {
         val frame: UnplayedFrame = UnplayedFrame()
         
         val frame2 = frame.roll(PinCount(3))
@@ -52,7 +63,6 @@ class LineTests {
         
         val frame3 = frame2.roll(PinCount(4))
         assertTrue(frame3 is OpenFrame)
-        
     }
 }
 

@@ -3,62 +3,73 @@ package dev.javaToKotlin
 
 sealed interface Frame
 
-interface PlayableFrame: Frame {
+interface PlayableFrame : Frame {
     fun roll(pinCount: PinCount): Frame
 }
 
-class UnplayedFrame: PlayableFrame {
+class UnplayedFrame : PlayableFrame {
     override fun roll(pinCount: PinCount): Frame {
         return InProgressFrame()
     }
 }
 
-class InProgressFrame: PlayableFrame {
+class InProgressFrame : PlayableFrame {
     override fun roll(pinCount: PinCount): Frame {
         return OpenFrame()
     }
 }
 
-class OpenFrame: Frame
+class OpenFrame : Frame
 
 @JvmInline
-value class PinCount(val value: Int){
-    init{
+value class PinCount(val value: Int) {
+    init {
         require(value in 0..10)
     }
 }
+
 class Score
 typealias Player = String
-open class Line protected constructor (
+
+open class Line protected constructor(
     val player: Player,
     val frames: List<Frame>
 ) {
     companion object {
         operator fun invoke(
             player: Player,
-            frames: List<Frame>
-        ) : Line = when {
-            frames.isEmpty() -> Line(player, frames)
-            else -> PlayableLine(player, frames)
+            noOfFrames: Int = 10
+        ): Line = when (noOfFrames) {
+            in Int.MIN_VALUE..0 -> CompletedLine(player, emptyList())
+            else -> PlayableLine(player, List(noOfFrames) {
+                UnplayedFrame()
+            })
         }
     }
 }
 
-class CompletedLine(player: Player, frames: List<Frame>): Line(player, frames)
+class CompletedLine(player: Player, frames: List<Frame>) : Line(player, frames)
 
 typealias Game = List<Line>
 
-class PlayableLine(player: Player, frames: List<Frame>)
-    : Line(player, frames) {
+class PlayableLine(player: Player, frames: List<Frame>) : Line(player, frames) {
     fun roll(pinCount: PinCount): Line {
-        val currentFrame = frames.firstOrNull{it is PlayableFrame}
-        if(currentFrame !is PlayableFrame)  error("Unexpected non playable frame")
-        val newFrame = currentFrame.roll(pinCount)
-        return when (newFrame) {
-            is InProgressFrame -> PlayableLine(player, listOf(newFrame))
-            else -> CompletedLine(player, listOf(newFrame))
+        val currentFrame = frames.firstOrNull { it is PlayableFrame }
+        require(currentFrame is PlayableFrame){
+            "Unexpected non playable frame"
+        }
+        val newFrameState = currentFrame.roll(pinCount)
+        val newFrames = frames.replacing(currentFrame, newFrameState)
+        return when (newFrames.last()) {
+            is PlayableFrame -> PlayableLine(player, newFrames)
+            else -> CompletedLine(player, newFrames)
         }
     }
+}
+
+fun <T> List<T>.replacing(item: T, newItem: T): List<T> = this.map {
+    if (it === item) newItem
+    else it
 }
 
 
