@@ -10,10 +10,20 @@ value class PinCount(val value: Int){
 }
 class Score
 typealias Player = String
-open class Line(
+open class Line protected constructor (
     val player: Player,
     val frames: List<Frame>
-)
+) {
+    companion object {
+        operator fun invoke(
+            player: Player,
+            frames: List<Frame>
+        ) : Line = when {
+            frames.isEmpty() -> Line(player, frames)
+            else -> PlayableLine(player, frames)
+        }
+    }
+}
 typealias Game = List<Line>
 
 class PlayableLine(player: Player, frames: List<Frame>)
