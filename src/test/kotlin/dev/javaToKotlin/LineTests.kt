@@ -26,6 +26,22 @@ class LineTests {
         
         assertTrue(line is PlayableLine)
     }
+    
+    @Test
+    fun `can roll on a playable line`() {
+        val line = Line(
+            player = "Barney",
+            frames = listOf(Frame())
+        )
+        
+        assertTrue(line is PlayableLine)
+        
+        val lineTwo = line.roll(PinCount(3))
+        assertTrue(lineTwo is PlayableLine)
+        
+        val lineThree = line.roll(PinCount(4))
+        assertTrue(lineThree !is PlayableLine)
+    }
 }
 
 

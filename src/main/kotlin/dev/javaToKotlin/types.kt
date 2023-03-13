@@ -28,7 +28,9 @@ typealias Game = List<Line>
 
 class PlayableLine(player: Player, frames: List<Frame>)
     : Line(player, frames) {
-    
+    fun roll(pinCount: PinCount): Line {
+        return this
+    }
 }
 
 
