@@ -21,7 +21,7 @@ class LineTests {
     fun `a non empty line is playable`() {
         val line = Line(
             player = "Barney",
-            frames = listOf(Frame())
+            frames = listOf(UnplayedFrame())
         )
         
         assertTrue(line is PlayableLine)
@@ -31,7 +31,7 @@ class LineTests {
     fun `can roll on a playable line`() {
         val line = Line(
             player = "Barney",
-            frames = listOf(Frame())
+            frames = listOf(UnplayedFrame())
         )
         
         assertTrue(line is PlayableLine)
@@ -39,8 +39,20 @@ class LineTests {
         val lineTwo = line.roll(PinCount(3))
         assertTrue(lineTwo is PlayableLine)
         
-        val lineThree = line.roll(PinCount(4))
+        val lineThree = lineTwo.roll(PinCount(4))
         assertTrue(lineThree !is PlayableLine)
+    }
+    
+    @Test
+    fun `something about frames`() {
+        val frame: UnplayedFrame = UnplayedFrame()
+        
+        val frame2 = frame.roll(PinCount(3))
+        assertTrue(frame2 is InProgressFrame)
+        
+        val frame3 = frame2.roll(PinCount(4))
+        assertTrue(frame3 is OpenFrame)
+        
     }
 }
 

@@ -1,7 +1,26 @@
 package dev.javaToKotlin
 
 
-class Frame
+sealed interface Frame
+
+interface PlayableFrame: Frame {
+    fun roll(pinCount: PinCount): Frame
+}
+
+class UnplayedFrame: PlayableFrame {
+    override fun roll(pinCount: PinCount): Frame {
+        return InProgressFrame()
+    }
+}
+
+class InProgressFrame: PlayableFrame {
+    override fun roll(pinCount: PinCount): Frame {
+        return OpenFrame()
+    }
+}
+
+class OpenFrame: Frame
+
 @JvmInline
 value class PinCount(val value: Int){
     init{
@@ -24,12 +43,21 @@ open class Line protected constructor (
         }
     }
 }
+
+class CompletedLine(player: Player, frames: List<Frame>): Line(player, frames)
+
 typealias Game = List<Line>
 
 class PlayableLine(player: Player, frames: List<Frame>)
     : Line(player, frames) {
     fun roll(pinCount: PinCount): Line {
-        return this
+        val currentFrame = frames.firstOrNull{it is PlayableFrame}
+        if(currentFrame !is PlayableFrame)  error("Unexpected non playable frame")
+        val newFrame = currentFrame.roll(pinCount)
+        return when (newFrame) {
+            is InProgressFrame -> PlayableLine(player, listOf(newFrame))
+            else -> CompletedLine(player, listOf(newFrame))
+        }
     }
 }
 
