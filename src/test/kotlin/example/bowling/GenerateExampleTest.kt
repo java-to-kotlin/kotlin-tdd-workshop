@@ -6,7 +6,7 @@ import kotlin.test.Test
 class GenerateExampleTest {
     @Test
     fun `generate example`() {
-        val game = randomGame(2)
+        val game = Random.nextGame(2, 7)
         val viewState = game.toViewState()
         
         viewState.toLines().forEach(::println)
@@ -34,7 +34,12 @@ private fun List<FrameScore>.frameScoreLine(name: String): String =
         joinToString(
             separator = " | ", prefix = "| ", postfix = " |",
             transform = FrameScore::toScoreDisplay
-        )
+        ) +
+        emptyCells(10-size)
+        
+
+private fun emptyCells(n: Int) =
+    "     |".repeat(n)
 
 private val dividerLine =
     "+" + "-".repeat(maxPlayerNameLen + 2) + "+" + "-----+".repeat(10)
@@ -56,7 +61,8 @@ private fun List<FrameScore>.runningTotalLine(): String =
     "| " + total.toString().padStart(maxPlayerNameLen, ' ') + " " +
         joinToString(separator = " | ", prefix = "| ", postfix = " |") {
             it.runningTotal.toString().padCentered(3)
-        }
+        } +
+        emptyCells(10-size)
 
 private fun String.padCentered(toLen: Int): String {
     val space = (toLen - length) / 2
@@ -71,21 +77,25 @@ private fun Int?.toRollDisplay(): String =
     }
 
 
-fun randomGame(playerCount: Int, rng: Random = Random): GameInProgress {
-    tailrec fun generateGame(game: GameInProgress, currentPlayer: Int): GameInProgress {
-        if (game.gameIsOver()) {
+fun Random.nextGame(playerCount: Int, maxRolls: Int = Int.MAX_VALUE): GameInProgress {
+    tailrec fun generateGame(game: GameInProgress, currentPlayer: Int, rollsLeft: Int): GameInProgress {
+        if (game.gameIsOver() || rollsLeft == 0) {
             return game
         } else {
-            val roll1 = rng.nextInt(11)
+            val roll1 = nextInt(11)
             val afterRoll = game.roll(roll1)
-            if (afterRoll.gameIsOver() || roll1 == 10) {
-                return generateGame(afterRoll, (currentPlayer + 1) % playerCount)
-            } else {
-                val roll2 = rng.nextInt(11 - roll1)
-                return generateGame(afterRoll.roll(roll2), (currentPlayer + 1) % playerCount)
-            }
+            val nextTurn =
+                if (afterRoll.gameIsOver() || roll1 == 10) afterRoll else afterRoll.roll(nextInt(11 - roll1))
+            
+            val nextPlayer = (currentPlayer + 1) % playerCount
+            
+            return generateGame(
+                game = nextTurn,
+                currentPlayer = nextPlayer,
+                rollsLeft = if (nextPlayer == 0) rollsLeft - 1 else rollsLeft
+            )
         }
     }
     
-    return generateGame(newGame(playerCount), 0)
+    return generateGame(newGame(playerCount), 0, maxRolls)
 }
