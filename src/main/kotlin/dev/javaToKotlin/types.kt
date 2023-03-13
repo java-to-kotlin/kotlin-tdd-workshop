@@ -60,9 +60,32 @@ interface Game {
     val lines : List<Line>
 }
 
-class InProgressGame(override val lines: List<Line>) : Game {
+class CompletedGame(override val lines: List<Line>) : Game {
+
+}
+
+data class InProgressGame(override val lines: List<Line>) : Game {
+    val currentLine: PlayableLine get() {
+        // if length equal, return first one
+        val linesLengths = lines.map{line ->
+            val index = line.frames.indexOfFirst{it is PlayableFrame}
+            if (index == -1)
+                Int.MAX_VALUE
+            else
+                index
+        }
+        
+        val minLength = linesLengths.min()
+        val currentLinIndex = linesLengths.indexOfFirst { it == minLength }
+        return lines[currentLinIndex] as PlayableLine
+        // else find the shortest playable line list
+    }
+    
     fun roll(pinCount: PinCount) : Game {
-        return this
+        val newLine = currentLine.roll(pinCount)
+        val newLines = lines.replacing(currentLine, newLine)
+        val canGameContinue = newLines.any{it is PlayableLine}
+        return if (canGameContinue) copy(lines=newLines) else CompletedGame(newLines)
     }
     
 }
