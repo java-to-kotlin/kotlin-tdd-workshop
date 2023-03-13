@@ -55,6 +55,25 @@ class LineTests {
     }
     
     @Test
+    fun `initial strike in two frame line`() {
+        var line = Line(
+            player = "Barney",
+            noOfFrames = 2
+        )
+        
+        assertTrue(line is PlayableLine)
+        
+        line = line.roll(PinCount(10))
+        assertTrue(line is PlayableLine)
+        
+        line = line.roll(PinCount(2))
+        assertTrue(line is PlayableLine)
+        
+        line = line.roll(PinCount(3))
+        assertTrue(line !is PlayableLine)
+    }
+    
+    @Test
     fun `rolling playable frames`() {
         val frame: UnplayedFrame = UnplayedFrame()
         
