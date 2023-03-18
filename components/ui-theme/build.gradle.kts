@@ -2,9 +2,9 @@ import com.bnorm.power.PowerAssertGradleExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.0"
-    id("org.jetbrains.compose") version "1.3.0"
-    id("com.bnorm.power.kotlin-power-assert") version "0.12.0"
+    kotlin("jvm")
+    id("org.jetbrains.compose")
+    id("com.bnorm.power.kotlin-power-assert")
 }
 
 repositories {

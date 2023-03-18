@@ -2,7 +2,7 @@ import org.gradle.configurationcache.extensions.capitalized
 
 plugins {
     kotlin("jvm") version "1.8.0" apply false
-    id("org.jetbrains.compose") version "1.3.0" apply false
+    id("org.jetbrains.compose") version "1.3.1" apply false
     id("com.bnorm.power.kotlin-power-assert") version "0.12.0" apply false
 }
 
@@ -10,9 +10,15 @@ val runnableComponents = listOf("console", "fake-pinsetter", "multiplexer")
 
 val workshopDir = rootDir.resolve("workshop")
 
-val mkWorkshopDir = tasks.register("mkWorkshopDir") {
+val mkWorkshopDir by tasks.creating {
     doLast {
         mkdir(workshopDir)
+    }
+}
+
+val mkBuildDir by tasks.creating {
+    doLast {
+        mkdir(buildDir)
     }
 }
 
@@ -35,7 +41,7 @@ val prepareScripts = tasks.register<Copy>("prepareScripts") {
 }
 
 val prepareDocs = tasks.register<Exec>("prepareDocs") {
-    dependsOn(mkWorkshopDir)
+    dependsOn(mkWorkshopDir, mkBuildDir)
     
     executable = projectDir.resolve("build-doc").absolutePath
     args(
