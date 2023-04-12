@@ -25,14 +25,18 @@ class UnplayedFrame() : IncompleteFrame {
 
 class PartialFrame(val roll1: Pinfall) : IncompleteFrame {
     override fun roll(pinfall: Pinfall) =
-        OpenFrame(roll1, pinfall)
+        if (roll1.fallenPins + pinfall.fallenPins == 10) {
+            Spare(roll1)
+        } else {
+            OpenFrame(roll1, pinfall)
+        }
 }
 
 sealed interface CompleteFrame : Frame
 
-class OpenFrame(val roll1: Pinfall, val roll2: Pinfall) : CompleteFrame {
+class Spare(val roll1: Pinfall) : CompleteFrame
 
-}
+class OpenFrame(val roll1: Pinfall, val roll2: Pinfall) : CompleteFrame
 
 class Strike : CompleteFrame
 
@@ -78,6 +82,7 @@ private fun Frame.render() =
         is OpenFrame -> "${this.roll1.render()},${this.roll2.render()}, "
         is Strike -> " ,X, "
         is UnplayedFrame -> " , , "
+        is Spare -> "${this.roll1.render()},/, "
     }
 
 private fun Pinfall.render() = when (fallenPins) {

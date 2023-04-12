@@ -42,4 +42,20 @@ class LineRenderingTest {
         line = (line as PlayableLine).roll(Pinfall(0))
         assertEquals("-,-, |2,-, ", line.render())
     }
+
+    @Test
+    fun `should render spares`() {
+        var line: Line = newLine(2)
+        line = (line as PlayableLine).roll(Pinfall(0))
+        assertEquals("-, , | , , ", line.render())
+
+        line = (line as PlayableLine).roll(Pinfall(10))
+        assertEquals("-,/, | , , ", line.render())
+
+        line = (line as PlayableLine).roll(Pinfall(1))
+        assertEquals("-,/, |1, , ", line.render())
+
+        line = (line as PlayableLine).roll(Pinfall(9))
+        assertEquals("-,/, |1,/, ", line.render())
+    }
 }
