@@ -32,8 +32,9 @@ class CompleteFrame : Frame {
 
 interface Line
 
-class PlayableLine(
-    val rolled: Int
+data class PlayableLine(
+    val frameCount: Int,
+    val rolled: Int = 0
 ) : Line {
 
 }
@@ -43,12 +44,11 @@ class CompleteLine : Line {
 }
 
 fun PlayableLine.roll(pinfall: Pinfall): Line {
-    return when (rolled) {
-        0 -> PlayableLine(1)
-        else -> CompleteLine()
-    }
+    if (rolled >= frameCount * 2 - 1)
+        return CompleteLine()
+    return copy(rolled = rolled + 1)
 }
 
 fun newLine(frameCount: Int): PlayableLine {
-    return PlayableLine(0)
+    return PlayableLine(frameCount = frameCount)
 }
