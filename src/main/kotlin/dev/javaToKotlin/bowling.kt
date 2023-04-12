@@ -5,6 +5,8 @@ value class Pinfall(val fallenPins: Int) {
     init {
         require(fallenPins in 0..10)
     }
+
+    override fun toString(): String = fallenPins.toString()
 }
 
 interface Frame
@@ -17,11 +19,11 @@ class UnplayedFrame() : Frame, PlayableFrame {
     override fun roll(pinfall: Pinfall) =
         when (pinfall.fallenPins) {
             10 -> CompleteFrame()
-            else -> PartialFrame()
+            else -> PartialFrame(pinfall)
         }
 }
 
-class PartialFrame : Frame, PlayableFrame {
+class PartialFrame(val roll1: Pinfall) : Frame, PlayableFrame {
     override fun roll(pinfall: Pinfall) =
         CompleteFrame()
 }
@@ -63,4 +65,8 @@ private fun PlayableLine.getCurrentFrameIndex(): Int {
     return frames.indexOfFirst { it is PlayableFrame }
 }
 
-fun Line.render(): String = frames.joinToString("|") { " , , " }
+fun Line.render(): String =
+    frames.joinToString("|") { it.render() }
+
+private fun Frame.render() =
+    if (this is PartialFrame) "${this.roll1}, , " else " , , "
