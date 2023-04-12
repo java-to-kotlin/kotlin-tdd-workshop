@@ -26,6 +26,12 @@ class LineTest {
 
         line = line.roll(Pinfall(1))
         assertTrue(line is PlayableLine)
+
+        line = line.roll(Pinfall(1))
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(Pinfall(1))
+        assertTrue(line is CompleteLine)
     }
 }
 
