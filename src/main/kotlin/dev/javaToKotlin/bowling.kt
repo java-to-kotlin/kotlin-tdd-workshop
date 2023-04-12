@@ -8,7 +8,10 @@ value class Pinfall(val fallenPins: Int) {
 }
 
 fun UnplayedFrame.roll(pinfall: Pinfall) =
-    PartialFrame()
+    when (pinfall.fallenPins) {
+        10 -> CompleteFrame()
+        else -> PartialFrame()
+    }
 
 fun PartialFrame.roll(pinfall: Pinfall) =
     CompleteFrame()
