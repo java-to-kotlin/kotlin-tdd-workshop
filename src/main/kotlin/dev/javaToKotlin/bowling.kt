@@ -42,8 +42,8 @@ class CompleteLine : Line {
 }
 
 fun PlayableLine.roll(pinfall: Pinfall): Line {
-    val currentFrame = frames[currentFrameIndex] as PlayableFrame
-    val newFrame = currentFrame.roll(pinfall)
+    val currentFrameIndex = getCurrentFrameIndex()
+    val newFrame = (frames[currentFrameIndex] as PlayableFrame).roll(pinfall)
     val newFrames = frames.toMutableList().apply {
         set(currentFrameIndex, newFrame)
     }
@@ -58,7 +58,6 @@ fun newLine(frameCount: Int): PlayableLine {
     return PlayableLine(frames = List(frameCount) { UnplayedFrame() })
 }
 
-val PlayableLine.currentFrameIndex: Int
-    get() {
-        return frames.indexOfFirst { it is PlayableFrame }
-    }
+private fun PlayableLine.getCurrentFrameIndex(): Int {
+    return frames.indexOfFirst { it is PlayableFrame }
+}
