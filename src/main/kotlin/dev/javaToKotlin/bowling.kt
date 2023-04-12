@@ -18,17 +18,17 @@ interface PlayableFrame {
 class UnplayedFrame() : Frame, PlayableFrame {
     override fun roll(pinfall: Pinfall) =
         when (pinfall.fallenPins) {
-            10 -> CompleteFrame()
+            10 -> CompleteFrame(Pinfall(10), Pinfall(0))
             else -> PartialFrame(pinfall)
         }
 }
 
 class PartialFrame(val roll1: Pinfall) : Frame, PlayableFrame {
     override fun roll(pinfall: Pinfall) =
-        CompleteFrame()
+        CompleteFrame(roll1, pinfall)
 }
 
-class CompleteFrame : Frame {
+class CompleteFrame(val roll1: Pinfall, val roll2: Pinfall) : Frame {
 
 }
 
@@ -69,4 +69,8 @@ fun Line.render(): String =
     frames.joinToString("|") { it.render() }
 
 private fun Frame.render() =
-    if (this is PartialFrame) "${this.roll1}, , " else " , , "
+    when (this) {
+        is PartialFrame -> "${this.roll1}, , "
+        is CompleteFrame -> "${this.roll1},${this.roll2}, "
+        else -> " , , "
+    }
