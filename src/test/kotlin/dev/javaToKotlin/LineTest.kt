@@ -6,24 +6,17 @@ import kotlin.test.assertTrue
 class LineTest {
     @Test
     fun `test`() {
-        var line: Line = newLine(frameCount = 2)
-        assertTrue(line is PlaybleLine)
+        var line: Line = newLine(frameCount = 1)
+        assertTrue(line is PlayableLine)
 
         line = line.roll(Pinfall(1))
-        assertTrue(line is PlaybleLine)
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(Pinfall(1))
+        assertTrue(line is CompleteLine)
     }
 }
 
-private fun PlaybleLine.roll(pinfall: Pinfall): Line {
-    return this
-}
 
-private fun newLine(frameCount: Int): PlaybleLine {
-    return PlaybleLine()
-}
 
-interface Line
 
-class PlaybleLine : Line {
-
-}
