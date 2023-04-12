@@ -1,5 +1,6 @@
 package dev.javaToKotlin
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
 
@@ -33,6 +34,7 @@ class LineTest {
         line = line.roll(Pinfall(1))
         assertTrue(line is CompleteLine)
     }
+
 }
 
 
