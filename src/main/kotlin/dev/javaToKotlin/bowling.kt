@@ -75,7 +75,7 @@ fun Line.render(): String =
 private fun Frame.render() =
     when (this) {
         is PartialFrame -> "${this.roll1.render()}, , "
-        is OpenFrame -> "${this.roll1},${this.roll2}, "
+        is OpenFrame -> "${this.roll1.render()},${this.roll2.render()}, "
         is Strike -> " ,X, "
         is UnplayedFrame -> " , , "
     }

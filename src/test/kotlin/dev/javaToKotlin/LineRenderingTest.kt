@@ -28,9 +28,18 @@ class LineRenderingTest {
     }
 
     @Test
-    fun `should render miss`() {
-        var line = newLine(2)
-        line = line.roll(Pinfall(0)) as PlayableLine
+    fun `should render misses`() {
+        var line: Line = newLine(2)
+        line = (line as PlayableLine).roll(Pinfall(0))
         assertEquals("-, , | , , ", line.render())
+
+        line = (line as PlayableLine).roll(Pinfall(0))
+        assertEquals("-,-, | , , ", line.render())
+
+        line = (line as PlayableLine).roll(Pinfall(2))
+        assertEquals("-,-, |2, , ", line.render())
+
+        line = (line as PlayableLine).roll(Pinfall(0))
+        assertEquals("-,-, |2,-, ", line.render())
     }
 }
