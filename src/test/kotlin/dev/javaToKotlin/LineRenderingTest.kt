@@ -12,7 +12,7 @@ class LineRenderingTest {
     }
 
     @Test
-    fun `should render frames`() {
+    fun `should render partial and open frames`() {
         var line = newLine(2)
         line = line.roll(Pinfall(3)) as PlayableLine
         assertEquals("3, , | , , ", line.render())
@@ -25,5 +25,12 @@ class LineRenderingTest {
         var line = newLine(2)
         line = line.roll(Pinfall(10)) as PlayableLine
         assertEquals(" ,X, | , , ", line.render())
+    }
+
+    @Test
+    fun `should render miss`() {
+        var line = newLine(2)
+        line = line.roll(Pinfall(0)) as PlayableLine
+        assertEquals("-, , | , , ", line.render())
     }
 }

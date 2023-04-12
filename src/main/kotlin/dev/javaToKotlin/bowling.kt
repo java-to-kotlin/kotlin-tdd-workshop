@@ -74,10 +74,13 @@ fun Line.render(): String =
 
 private fun Frame.render() =
     when (this) {
-        is PartialFrame -> "${this.roll1}, , "
+        is PartialFrame -> "${this.roll1.render()}, , "
         is OpenFrame -> "${this.roll1},${this.roll2}, "
         is Strike -> " ,X, "
         is UnplayedFrame -> " , , "
     }
 
-
+private fun Pinfall.render() = when (fallenPins) {
+    0 -> "-"
+    else -> fallenPins.toString()
+}
