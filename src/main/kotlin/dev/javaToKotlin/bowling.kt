@@ -7,11 +7,11 @@ value class Pinfall(val fallenPins: Int) {
     }
 }
 
-fun UnplayedFrame.roll(pinfall: Pinfall): Frame {
+fun UnplayedFrame.roll(pinfall: Pinfall) =
+    PartialFrame()
 
-    return PartialFrame()
-
-}
+fun PartialFrame.roll(pinfall: Pinfall) =
+    CompleteFrame()
 
 interface Frame
 
@@ -20,5 +20,9 @@ class UnplayedFrame() : Frame {
 }
 
 class PartialFrame : Frame {
+
+}
+
+class CompleteFrame : Frame {
 
 }

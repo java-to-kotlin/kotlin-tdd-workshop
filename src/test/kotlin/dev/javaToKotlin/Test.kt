@@ -13,10 +13,13 @@ class FrameTest {
 
         val nextState: PartialFrame =
             frame.roll(Pinfall(1)) as PartialFrame
+
+        assertTrue(nextState.roll(Pinfall(3)) is CompleteFrame)
     }
 
 
 
 }
+
 
 
