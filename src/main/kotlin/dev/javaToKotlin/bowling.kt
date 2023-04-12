@@ -31,15 +31,16 @@ class CompleteFrame : Frame {
 }
 
 interface Line {
+    val frames: List<Frame>
 }
 
 data class PlayableLine(
-    val frames: List<Frame>
+    override val frames: List<Frame>
 ) : Line
 
-class CompleteLine : Line {
-
-}
+class CompleteLine(
+    override val frames: List<Frame>
+) : Line
 
 fun PlayableLine.roll(pinfall: Pinfall): Line {
     val currentFrameIndex = getCurrentFrameIndex()
@@ -49,7 +50,7 @@ fun PlayableLine.roll(pinfall: Pinfall): Line {
     }
 
     return when {
-        newFrames.last() is CompleteFrame -> CompleteLine()
+        newFrames.last() is CompleteFrame -> CompleteLine(newFrames)
         else -> copy(frames = newFrames)
     }
 }
@@ -61,3 +62,5 @@ fun newLine(frameCount: Int): PlayableLine {
 private fun PlayableLine.getCurrentFrameIndex(): Int {
     return frames.indexOfFirst { it is PlayableFrame }
 }
+
+fun Line.render(): String = frames.joinToString("|") { " , , " }
