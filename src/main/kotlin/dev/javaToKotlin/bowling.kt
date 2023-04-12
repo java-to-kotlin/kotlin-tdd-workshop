@@ -34,8 +34,6 @@ interface Line {
 }
 
 data class PlayableLine(
-    val frameCount: Int,
-    val rolled: Int = 0,
     val frames: List<Frame>
 ) : Line
 
@@ -52,13 +50,12 @@ fun PlayableLine.roll(pinfall: Pinfall): Line {
 
     return when {
         newFrames.last() is CompleteFrame -> CompleteLine()
-        else -> copy(rolled = rolled + 1, frames = newFrames)
+        else -> copy(frames = newFrames)
     }
 }
 
 fun newLine(frameCount: Int): PlayableLine {
-    return PlayableLine(frameCount = frameCount,
-        frames = List(frameCount) { UnplayedFrame() })
+    return PlayableLine(frames = List(frameCount) { UnplayedFrame() })
 }
 
 val PlayableLine.currentFrameIndex: Int
