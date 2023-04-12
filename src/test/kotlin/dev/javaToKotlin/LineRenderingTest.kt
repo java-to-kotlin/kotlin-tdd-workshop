@@ -25,6 +25,5 @@ class LineRenderingTest {
         var line = newLine(2)
         line = line.roll(Pinfall(10)) as PlayableLine
         assertEquals(" ,X, | , , ", line.render())
-
     }
 }

@@ -9,9 +9,9 @@ value class Pinfall(val fallenPins: Int) {
     override fun toString(): String = fallenPins.toString()
 }
 
-interface Frame
+sealed interface Frame
 
-interface IncompleteFrame : Frame {
+sealed interface IncompleteFrame : Frame {
     fun roll(pinfall: Pinfall): Frame
 }
 
@@ -28,7 +28,7 @@ class PartialFrame(val roll1: Pinfall) : IncompleteFrame {
         OpenFrame(roll1, pinfall)
 }
 
-interface CompleteFrame : Frame
+sealed interface CompleteFrame : Frame
 
 class OpenFrame(val roll1: Pinfall, val roll2: Pinfall) : CompleteFrame {
 
@@ -61,7 +61,6 @@ fun PlayableLine.roll(pinfall: Pinfall): Line {
     }
 }
 
-
 fun newLine(frameCount: Int): PlayableLine {
     return PlayableLine(frames = List(frameCount) { UnplayedFrame() })
 }
@@ -78,7 +77,7 @@ private fun Frame.render() =
         is PartialFrame -> "${this.roll1}, , "
         is OpenFrame -> "${this.roll1},${this.roll2}, "
         is Strike -> " ,X, "
-        else -> " , , "
+        is UnplayedFrame -> " , , "
     }
 
 
