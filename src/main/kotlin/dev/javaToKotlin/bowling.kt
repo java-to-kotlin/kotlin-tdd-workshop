@@ -44,14 +44,14 @@ class CompleteLine : Line {
 }
 
 fun PlayableLine.roll(pinfall: Pinfall): Line {
-    val currentFrame = frames.get(currentFrameIndex) as PlayableFrame
+    val currentFrame = frames[currentFrameIndex] as PlayableFrame
     val newFrame = currentFrame.roll(pinfall)
     val newFrames = frames.toMutableList().apply {
         set(currentFrameIndex, newFrame)
     }
 
     return when {
-        rolled >= frameCount * 2 - 1 -> CompleteLine()
+        newFrames.last() is CompleteFrame -> CompleteLine()
         else -> copy(rolled = rolled + 1, frames = newFrames)
     }
 }
