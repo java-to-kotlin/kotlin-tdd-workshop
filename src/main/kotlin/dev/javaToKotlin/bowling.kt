@@ -29,3 +29,4 @@ class PartialFrame : Frame {
 class CompleteFrame : Frame {
 
 }
+
