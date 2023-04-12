@@ -11,11 +11,11 @@ value class Pinfall(val fallenPins: Int) {
 
 interface Frame
 
-interface PlayableFrame {
+interface IncompleteFrame : Frame {
     fun roll(pinfall: Pinfall): Frame
 }
 
-class UnplayedFrame() : Frame, PlayableFrame {
+class UnplayedFrame() : IncompleteFrame {
     override fun roll(pinfall: Pinfall) =
         when (pinfall.fallenPins) {
             10 -> Strike()
@@ -23,16 +23,18 @@ class UnplayedFrame() : Frame, PlayableFrame {
         }
 }
 
-class PartialFrame(val roll1: Pinfall) : Frame, PlayableFrame {
+class PartialFrame(val roll1: Pinfall) : IncompleteFrame {
     override fun roll(pinfall: Pinfall) =
         OpenFrame(roll1, pinfall)
 }
 
-class OpenFrame(val roll1: Pinfall, val roll2: Pinfall) : Frame {
+interface CompleteFrame : Frame
+
+class OpenFrame(val roll1: Pinfall, val roll2: Pinfall) : CompleteFrame {
 
 }
 
-class Strike : Frame
+class Strike : CompleteFrame
 
 interface Line {
     val frames: List<Frame>
@@ -48,23 +50,24 @@ class CompleteLine(
 
 fun PlayableLine.roll(pinfall: Pinfall): Line {
     val currentFrameIndex = getCurrentFrameIndex()
-    val newFrame = (frames[currentFrameIndex] as PlayableFrame).roll(pinfall)
+    val newFrame = (frames[currentFrameIndex] as IncompleteFrame).roll(pinfall)
     val newFrames = frames.toMutableList().apply {
         set(currentFrameIndex, newFrame)
     }
 
     return when {
-        newFrames.last() is OpenFrame -> CompleteLine(newFrames)
+        newFrames.last() is CompleteFrame -> CompleteLine(newFrames)
         else -> copy(frames = newFrames)
     }
 }
+
 
 fun newLine(frameCount: Int): PlayableLine {
     return PlayableLine(frames = List(frameCount) { UnplayedFrame() })
 }
 
 private fun PlayableLine.getCurrentFrameIndex(): Int {
-    return frames.indexOfFirst { it is PlayableFrame }
+    return frames.indexOfFirst { it is IncompleteFrame }
 }
 
 fun Line.render(): String =

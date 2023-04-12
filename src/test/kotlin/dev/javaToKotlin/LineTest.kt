@@ -49,6 +49,21 @@ class LineTest {
         assertTrue(line is CompleteLine)
     }
 
+    @Test
+    fun `open frame then strike`() {
+        var line: Line = newLine(frameCount = 2)
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(Pinfall(1))
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(Pinfall(1))
+        assertTrue(line is PlayableLine)
+
+        line = line.roll(Pinfall(10))
+        assertTrue(line is CompleteLine)
+    }
+
 }
 
 
