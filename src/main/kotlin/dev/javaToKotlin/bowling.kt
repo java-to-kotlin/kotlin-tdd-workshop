@@ -18,19 +18,21 @@ interface PlayableFrame {
 class UnplayedFrame() : Frame, PlayableFrame {
     override fun roll(pinfall: Pinfall) =
         when (pinfall.fallenPins) {
-            10 -> CompleteFrame(Pinfall(10), Pinfall(0))
+            10 -> Strike()
             else -> PartialFrame(pinfall)
         }
 }
 
 class PartialFrame(val roll1: Pinfall) : Frame, PlayableFrame {
     override fun roll(pinfall: Pinfall) =
-        CompleteFrame(roll1, pinfall)
+        OpenFrame(roll1, pinfall)
 }
 
-class CompleteFrame(val roll1: Pinfall, val roll2: Pinfall) : Frame {
+class OpenFrame(val roll1: Pinfall, val roll2: Pinfall) : Frame {
 
 }
+
+class Strike : Frame
 
 interface Line {
     val frames: List<Frame>
@@ -52,7 +54,7 @@ fun PlayableLine.roll(pinfall: Pinfall): Line {
     }
 
     return when {
-        newFrames.last() is CompleteFrame -> CompleteLine(newFrames)
+        newFrames.last() is OpenFrame -> CompleteLine(newFrames)
         else -> copy(frames = newFrames)
     }
 }
@@ -71,6 +73,9 @@ fun Line.render(): String =
 private fun Frame.render() =
     when (this) {
         is PartialFrame -> "${this.roll1}, , "
-        is CompleteFrame -> "${this.roll1},${this.roll2}, "
+        is OpenFrame -> "${this.roll1},${this.roll2}, "
+        is Strike -> " ,X, "
         else -> " , , "
     }
+
+

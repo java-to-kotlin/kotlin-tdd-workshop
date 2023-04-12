@@ -19,4 +19,12 @@ class LineRenderingTest {
         line = line.roll(Pinfall(2)) as PlayableLine
         assertEquals("3,2, | , , ", line.render())
     }
+
+    @Test
+    fun `should render strike`() {
+        var line = newLine(2)
+        line = line.roll(Pinfall(10)) as PlayableLine
+        assertEquals(" ,X, | , , ", line.render())
+
+    }
 }

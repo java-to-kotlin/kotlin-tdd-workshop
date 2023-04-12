@@ -14,13 +14,13 @@ class FrameTest {
         assertTrue(frame is PartialFrame)
 
         frame = frame.roll(Pinfall(3))
-        assertTrue(frame is CompleteFrame)
+        assertTrue(frame is OpenFrame)
     }
 
     @Test
     fun `Throw a strike`() {
         val frame = UnplayedFrame().roll(Pinfall(10))
-        assertTrue(frame is CompleteFrame)
+        assertTrue(frame is Strike)
     }
 
 
